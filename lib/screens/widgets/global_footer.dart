@@ -25,15 +25,16 @@ class GlobalFooter extends StatefulWidget {
 
 class _GlobalFooterState extends State<GlobalFooter> {
   DateTime? _lastBackPressAt;
-  DateTime? _lastBackEventAt;
+  DateTime? _lastDedupBackEventAt;
 
   bool _isDuplicateBackEvent() {
     final now = DateTime.now();
-    if (_lastBackEventAt != null &&
-        now.difference(_lastBackEventAt!) < const Duration(milliseconds: 150)) {
+    if (_lastDedupBackEventAt != null &&
+        now.difference(_lastDedupBackEventAt!) <
+            const Duration(milliseconds: 150)) {
       return true;
     }
-    _lastBackEventAt = now;
+    _lastDedupBackEventAt = now;
     return false;
   }
 
