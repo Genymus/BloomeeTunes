@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Bloomee/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:Bloomee/core/di/service_locator.dart';
 import 'package:Bloomee/plugins/blocs/chart/chart_bloc.dart';
@@ -123,31 +125,33 @@ class _AppUISettingsState extends State<AppUISettings> {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
-              SettingSectionHeader(label: l10n.appuiBackPressExitSectionTitle),
-              SettingCard(
-                children: [
-                  SettingToggleTile(
-                    icon: Icons.exit_to_app_rounded,
-                    title: l10n.appuiBackPressExitToggleTitle,
-                    subtitle: l10n.appuiBackPressExitToggleSubtitle,
-                    value: state.androidBackPressExitConfirmEnabled,
-                    onChanged: (v) => context
-                        .read<SettingsCubit>()
-                        .setAndroidBackPressExitConfirmEnabled(v),
-                    roundBottom: !state.androidBackPressExitConfirmEnabled,
-                  ),
-                  if (state.androidBackPressExitConfirmEnabled) ...[
-                    const SettingDivider(),
-                    _BackExitConfirmTimeoutSlider(
-                      valueMs: state.androidBackPressExitConfirmTimeoutMs,
-                      onChanged: (timeoutMs) => context
+              if (Platform.isAndroid) ...[
+                const SizedBox(height: 28),
+                SettingSectionHeader(label: l10n.appuiBackPressExitSectionTitle),
+                SettingCard(
+                  children: [
+                    SettingToggleTile(
+                      icon: Icons.exit_to_app_rounded,
+                      title: l10n.appuiBackPressExitToggleTitle,
+                      subtitle: l10n.appuiBackPressExitToggleSubtitle,
+                      value: state.androidBackPressExitConfirmEnabled,
+                      onChanged: (v) => context
                           .read<SettingsCubit>()
-                          .setAndroidBackPressExitConfirmTimeoutMs(timeoutMs),
+                          .setAndroidBackPressExitConfirmEnabled(v),
+                      roundBottom: !state.androidBackPressExitConfirmEnabled,
                     ),
+                    if (state.androidBackPressExitConfirmEnabled) ...[
+                      const SettingDivider(),
+                      _BackExitConfirmTimeoutSlider(
+                        valueMs: state.androidBackPressExitConfirmTimeoutMs,
+                        onChanged: (timeoutMs) => context
+                            .read<SettingsCubit>()
+                            .setAndroidBackPressExitConfirmTimeoutMs(timeoutMs),
+                      ),
+                    ],
                   ],
-                ],
-              ),
+                ),
+              ],
               const SizedBox(height: 28),
               SettingSectionHeader(label: l10n.settingsChartVisibility),
               BlocBuilder<ChartBloc, ChartState>(
