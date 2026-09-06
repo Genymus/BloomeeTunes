@@ -41,7 +41,7 @@ class _GlobalFooterState extends State<GlobalFooter>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state != AppLifecycleState.resumed) {
       _lastBackPressAt = null;
     }
   }
@@ -142,7 +142,6 @@ class _GlobalFooterState extends State<GlobalFooter>
   Future<void> _handleHardwareBackPress(BuildContext context) async {
     final overlayC = context.read<PlayerOverlayCubit>();
     final router = GoRouter.of(context);
-    final settings = context.read<SettingsCubit>().state;
 
     // ① Navigator routes first
     if (router.canPop()) {
@@ -173,6 +172,7 @@ class _GlobalFooterState extends State<GlobalFooter>
 
     // ⑤ Exit app
     if (context.mounted) {
+      final settings = context.read<SettingsCubit>().state;
       if (Platform.isAndroid && settings.androidBackPressExitConfirmEnabled) {
         final now = DateTime.now();
         final timeout = Duration(
