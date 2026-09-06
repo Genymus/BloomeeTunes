@@ -25,18 +25,6 @@ class GlobalFooter extends StatefulWidget {
 
 class _GlobalFooterState extends State<GlobalFooter> {
   DateTime? _lastBackPressAt;
-  DateTime? _lastDedupBackEventAt;
-
-  bool _isDuplicateBackEvent() {
-    final now = DateTime.now();
-    if (_lastDedupBackEventAt != null &&
-        now.difference(_lastDedupBackEventAt!) <
-            const Duration(milliseconds: 150)) {
-      return true;
-    }
-    _lastDedupBackEventAt = now;
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +44,6 @@ class _GlobalFooterState extends State<GlobalFooter> {
         // was visible, swallowing Navigator pops and causing sub-screens to
         // appear orphaned over a hidden/collapsed player.
         onBackButtonPressed: () async {
-          if (_isDuplicateBackEvent()) return true;
           final overlayC = context.read<PlayerOverlayCubit>();
           final router = GoRouter.of(context);
 
@@ -87,7 +74,6 @@ class _GlobalFooterState extends State<GlobalFooter> {
           canPop: false,
           onPopInvokedWithResult: (didPop, _) async {
             if (didPop) return;
-            if (_isDuplicateBackEvent()) return;
             await _handleHardwareBackPress(context);
           },
           child: Scaffold(
@@ -182,6 +168,7 @@ class _GlobalFooterState extends State<GlobalFooter> {
           return;
         }
       }
+      _lastBackPressAt = null;
       await SystemNavigator.pop();
     }
   }
