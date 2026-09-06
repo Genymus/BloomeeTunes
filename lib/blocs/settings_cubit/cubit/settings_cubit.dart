@@ -15,6 +15,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   final SettingsRepository _settingsRepo;
   static const int _defaultBackPressExitConfirmTimeoutMs = 2000;
   static const int _minBackPressExitConfirmTimeoutMs = 1000;
+  static const int _maxBackPressExitConfirmTimeoutMs = 5000;
 
   SettingsCubit(this._settingsRepo) : super(SettingsInitial()) {
     _initSettings();
@@ -268,7 +269,9 @@ class SettingsCubit extends Cubit<SettingsState> {
         ? _defaultBackPressExitConfirmTimeoutMs
         : backConfirmTimeoutMs < _minBackPressExitConfirmTimeoutMs
             ? _minBackPressExitConfirmTimeoutMs
-            : backConfirmTimeoutMs;
+            : backConfirmTimeoutMs > _maxBackPressExitConfirmTimeoutMs
+                ? _maxBackPressExitConfirmTimeoutMs
+                : backConfirmTimeoutMs;
     if (backConfirmTimeoutRaw != normalizedBackConfirmTimeoutMs.toString()) {
       _settingsRepo.putSettingStr(
         SettingKeys.androidBackPressExitConfirmTimeoutMs,
@@ -446,7 +449,9 @@ class SettingsCubit extends Cubit<SettingsState> {
   void setAndroidBackPressExitConfirmTimeoutMs(int timeoutMs) {
     final normalized = timeoutMs < _minBackPressExitConfirmTimeoutMs
         ? _minBackPressExitConfirmTimeoutMs
-        : timeoutMs;
+        : timeoutMs > _maxBackPressExitConfirmTimeoutMs
+            ? _maxBackPressExitConfirmTimeoutMs
+            : timeoutMs;
     _settingsRepo.putSettingStr(
       SettingKeys.androidBackPressExitConfirmTimeoutMs,
       normalized.toString(),

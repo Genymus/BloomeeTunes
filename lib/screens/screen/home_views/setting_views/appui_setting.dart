@@ -227,19 +227,22 @@ class _BackExitConfirmTimeoutSlider extends StatefulWidget {
 
 class _BackExitConfirmTimeoutSliderState
     extends State<_BackExitConfirmTimeoutSlider> {
+  static const double _minSeconds = 1;
+  static const double _maxSeconds = 5;
   late double _seconds;
 
   @override
   void initState() {
     super.initState();
-    _seconds = (widget.valueMs / 1000).clamp(1, 5).toDouble();
+    _seconds = (widget.valueMs / 1000).clamp(_minSeconds, _maxSeconds).toDouble();
   }
 
   @override
   void didUpdateWidget(covariant _BackExitConfirmTimeoutSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.valueMs != widget.valueMs) {
-      _seconds = (widget.valueMs / 1000).clamp(1, 5).toDouble();
+      _seconds =
+          (widget.valueMs / 1000).clamp(_minSeconds, _maxSeconds).toDouble();
     }
   }
 
@@ -303,9 +306,9 @@ class _BackExitConfirmTimeoutSliderState
               overlayColor: Default_Theme.accentColor2.withValues(alpha: 0.15),
             ),
             child: Slider(
-              min: 1,
-              max: 5,
-              divisions: 4,
+              min: _minSeconds,
+              max: _maxSeconds,
+              divisions: (_maxSeconds - _minSeconds).toInt(),
               value: _seconds,
               onChanged: (v) => setState(() => _seconds = v),
               onChangeEnd: (v) => widget.onChanged(v.toInt() * 1000),
