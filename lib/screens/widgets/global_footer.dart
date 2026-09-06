@@ -23,8 +23,28 @@ class GlobalFooter extends StatefulWidget {
   State<GlobalFooter> createState() => _GlobalFooterState();
 }
 
-class _GlobalFooterState extends State<GlobalFooter> {
+class _GlobalFooterState extends State<GlobalFooter>
+    with WidgetsBindingObserver {
   DateTime? _lastBackPressAt;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _lastBackPressAt = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -87,10 +87,11 @@ class _AppUISettingsState extends State<AppUISettings> {
             prev.autoSlideCharts != curr.autoSlideCharts ||
             prev.lFMPicks != curr.lFMPicks ||
             prev.chartMap != curr.chartMap ||
-            prev.androidBackPressExitConfirmEnabled !=
-                curr.androidBackPressExitConfirmEnabled ||
-            prev.androidBackPressExitConfirmTimeoutMs !=
-                curr.androidBackPressExitConfirmTimeoutMs,
+            (Platform.isAndroid &&
+                (prev.androidBackPressExitConfirmEnabled !=
+                        curr.androidBackPressExitConfirmEnabled ||
+                    prev.androidBackPressExitConfirmTimeoutMs !=
+                        curr.androidBackPressExitConfirmTimeoutMs)),
         builder: (context, state) {
           return ListView(
             physics: const BouncingScrollPhysics(),
