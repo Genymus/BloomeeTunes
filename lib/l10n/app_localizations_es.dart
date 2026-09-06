@@ -698,6 +698,29 @@ class AppLocalizationsEs extends AppLocalizations {
       'Deslizar las listas automáticamente en el inicio.';
 
   @override
+  String get appuiBackPressExitSectionTitle => 'Salir con botón atrás';
+
+  @override
+  String get appuiBackPressExitToggleTitle =>
+      'Pedir doble toque para cerrar';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      'En Android, muestra una confirmación antes de cerrar desde inicio.';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => 'Tiempo máximo para repetir';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return 'Pulsa atrás otra vez en menos de $seconds segundos para cerrar.';
+  }
+
+  @override
+  String get appuiBackPressExitHint =>
+      'Pulsa atrás otra vez para cerrar la aplicación.';
+
+  @override
   String get appuiLastFmPicksSubtitle =>
       'Sugerencias de Last.FM. Requiere inicio de sesión y reinicio.';
 

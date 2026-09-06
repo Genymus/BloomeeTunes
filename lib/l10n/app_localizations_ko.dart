@@ -658,6 +658,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appuiAutoSlideChartsSubtitle => '홈 화면에서 차트를 자동으로 넘깁니다.';
 
   @override
+  String get appuiBackPressExitSectionTitle => '뒤로가기 종료 설정';
+
+  @override
+  String get appuiBackPressExitToggleTitle => '뒤로가기 두 번 눌러 종료';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      'Android 홈 화면에서 종료 전에 확인 안내를 표시합니다.';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => '다시 누르기 제한 시간';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return '$seconds초 이내에 다시 뒤로가기를 누르면 앱이 종료됩니다.';
+  }
+
+  @override
+  String get appuiBackPressExitHint => '앱을 종료하려면 뒤로가기를 한 번 더 누르세요.';
+
+  @override
   String get appuiLastFmPicksSubtitle => 'Last.FM 추천 곡을 표시합니다. (로그인 및 재시작 필요)';
 
   @override

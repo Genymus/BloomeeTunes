@@ -84,7 +84,11 @@ class _AppUISettingsState extends State<AppUISettings> {
         buildWhen: (prev, curr) =>
             prev.autoSlideCharts != curr.autoSlideCharts ||
             prev.lFMPicks != curr.lFMPicks ||
-            prev.chartMap != curr.chartMap,
+            prev.chartMap != curr.chartMap ||
+            prev.androidBackPressExitConfirmEnabled !=
+                curr.androidBackPressExitConfirmEnabled ||
+            prev.androidBackPressExitConfirmTimeoutMs !=
+                curr.androidBackPressExitConfirmTimeoutMs,
         builder: (context, state) {
           return ListView(
             physics: const BouncingScrollPhysics(),
@@ -120,6 +124,31 @@ class _AppUISettingsState extends State<AppUISettings> {
                 ],
               ),
               const SizedBox(height: 28),
+              SettingSectionHeader(label: l10n.appuiBackPressExitSectionTitle),
+              SettingCard(
+                children: [
+                  SettingToggleTile(
+                    icon: Icons.exit_to_app_rounded,
+                    title: l10n.appuiBackPressExitToggleTitle,
+                    subtitle: l10n.appuiBackPressExitToggleSubtitle,
+                    value: state.androidBackPressExitConfirmEnabled,
+                    onChanged: (v) => context
+                        .read<SettingsCubit>()
+                        .setAndroidBackPressExitConfirmEnabled(v),
+                    roundBottom: !state.androidBackPressExitConfirmEnabled,
+                  ),
+                  if (state.androidBackPressExitConfirmEnabled) ...[
+                    const SettingDivider(),
+                    _BackExitConfirmTimeoutSlider(
+                      valueMs: state.androidBackPressExitConfirmTimeoutMs,
+                      onChanged: (timeoutMs) => context
+                          .read<SettingsCubit>()
+                          .setAndroidBackPressExitConfirmTimeoutMs(timeoutMs),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 28),
               SettingSectionHeader(label: l10n.settingsChartVisibility),
               BlocBuilder<ChartBloc, ChartState>(
                 bloc: _chartBloc,
@@ -152,7 +181,6 @@ class _AppUISettingsState extends State<AppUISettings> {
                       ],
                     );
                   }
-
                   return SettingCard(
                     children: [
                       for (var i = 0; i < chartState.charts.length; i++) ...[
@@ -178,6 +206,112 @@ class _AppUISettingsState extends State<AppUISettings> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _BackExitConfirmTimeoutSlider extends StatefulWidget {
+  final int valueMs;
+  final ValueChanged<int> onChanged;
+
+  const _BackExitConfirmTimeoutSlider({
+    required this.valueMs,
+    required this.onChanged,
+  });
+
+  @override
+  State<_BackExitConfirmTimeoutSlider> createState() =>
+      _BackExitConfirmTimeoutSliderState();
+}
+
+class _BackExitConfirmTimeoutSliderState
+    extends State<_BackExitConfirmTimeoutSlider> {
+  late double _seconds;
+
+  @override
+  void initState() {
+    super.initState();
+    _seconds = (widget.valueMs / 1000).clamp(1, 5).toDouble();
+  }
+
+  @override
+  void didUpdateWidget(covariant _BackExitConfirmTimeoutSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.valueMs != widget.valueMs) {
+      _seconds = (widget.valueMs / 1000).clamp(1, 5).toDouble();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const SettingIconBox(icon: Icons.timer_outlined),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.appuiBackPressExitTimeoutTitle,
+                      style: const TextStyle(
+                        color: Default_Theme.primaryColor2,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                      ).merge(Default_Theme.secondoryTextStyleMedium),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.appuiBackPressExitTimeoutSubtitle(_seconds.toInt()),
+                      style: TextStyle(
+                        color: Default_Theme.primaryColor2.withValues(alpha: 0.5),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ).merge(Default_Theme.secondoryTextStyle),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${_seconds.toInt()}s',
+                style: const TextStyle(
+                  color: Default_Theme.accentColor2,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ).merge(Default_Theme.secondoryTextStyleMedium),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+              activeTrackColor: Default_Theme.accentColor2,
+              inactiveTrackColor:
+                  Default_Theme.primaryColor2.withValues(alpha: 0.1),
+              thumbColor: Default_Theme.accentColor2,
+              overlayColor: Default_Theme.accentColor2.withValues(alpha: 0.15),
+            ),
+            child: Slider(
+              min: 1,
+              max: 5,
+              divisions: 4,
+              value: _seconds,
+              onChanged: (v) => setState(() => _seconds = v),
+              onChangeEnd: (v) => widget.onChanged(v.toInt() * 1000),
+            ),
+          ),
+        ],
       ),
     );
   }

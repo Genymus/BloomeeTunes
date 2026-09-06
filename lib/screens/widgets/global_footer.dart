@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:Bloomee/blocs/player_overlay/player_overlay_cubit.dart';
+import 'package:Bloomee/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:Bloomee/screens/widgets/player_overlay_wrapper.dart';
 import 'package:Bloomee/screens/widgets/mini_player_widget.dart';
+import 'package:Bloomee/screens/widgets/snackbar.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +15,16 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class GlobalFooter extends StatelessWidget {
+class GlobalFooter extends StatefulWidget {
   const GlobalFooter({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
+
+  @override
+  State<GlobalFooter> createState() => _GlobalFooterState();
+}
+
+class _GlobalFooterState extends State<GlobalFooter> {
+  DateTime? _lastBackPressAt;
 
   @override
   Widget build(BuildContext context) {
@@ -39,17 +50,20 @@ class GlobalFooter extends StatelessWidget {
           // ① Navigator MUST have first priority — always.
           if (router.canPop()) {
             router.pop();
+            _lastBackPressAt = null;
             return true;
           }
 
           // ② Collapse UpNext panel if expanded (player must be visible).
           if (overlayC.state && overlayC.collapseUpNextPanel()) {
+            _lastBackPressAt = null;
             return true;
           }
 
           // ③ Hide the player overlay.
           if (overlayC.state) {
             overlayC.hidePlayer();
+            _lastBackPressAt = null;
             return true;
           }
 
@@ -66,16 +80,17 @@ class GlobalFooter extends StatelessWidget {
             backgroundColor: Default_Theme.themeColor,
             drawerScrimColor: Default_Theme.themeColor,
             body: isMobile
-                ? _AnimatedPageView(navigationShell: navigationShell)
+                ? _AnimatedPageView(navigationShell: widget.navigationShell)
                 : Row(
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 4),
-                        child: VerticalNavBar(navigationShell: navigationShell),
+                        child:
+                            VerticalNavBar(navigationShell: widget.navigationShell),
                       ),
                       Expanded(
                         child:
-                            _AnimatedPageView(navigationShell: navigationShell),
+                            _AnimatedPageView(navigationShell: widget.navigationShell),
                       ),
                     ],
                   ),
@@ -90,7 +105,8 @@ class GlobalFooter extends StatelessWidget {
                       color: Colors.transparent,
                       margin: const EdgeInsets.symmetric(
                           vertical: 5, horizontal: 10),
-                      child: HorizontalNavBar(navigationShell: navigationShell),
+                      child: HorizontalNavBar(
+                          navigationShell: widget.navigationShell),
                     ),
                 ],
               ),
@@ -106,30 +122,52 @@ class GlobalFooter extends StatelessWidget {
   Future<void> _handleHardwareBackPress(BuildContext context) async {
     final overlayC = context.read<PlayerOverlayCubit>();
     final router = GoRouter.of(context);
+    final settings = context.read<SettingsCubit>().state;
 
     // ① Navigator routes first
     if (router.canPop()) {
       router.pop();
+      _lastBackPressAt = null;
       return;
     }
 
     // ② Collapse UpNext panel
-    if (overlayC.state && overlayC.collapseUpNextPanel()) return;
+    if (overlayC.state && overlayC.collapseUpNextPanel()) {
+      _lastBackPressAt = null;
+      return;
+    }
 
     // ③ Hide player
     if (overlayC.state) {
       overlayC.hidePlayer();
+      _lastBackPressAt = null;
       return;
     }
 
     // ④ Navigate to home tab
-    if (navigationShell.currentIndex != 0) {
-      navigationShell.goBranch(0);
+    if (widget.navigationShell.currentIndex != 0) {
+      widget.navigationShell.goBranch(0);
+      _lastBackPressAt = null;
       return;
     }
 
     // ⑤ Exit app
     if (context.mounted) {
+      if (Platform.isAndroid && settings.androidBackPressExitConfirmEnabled) {
+        final now = DateTime.now();
+        final timeout = Duration(
+          milliseconds: settings.androidBackPressExitConfirmTimeoutMs,
+        );
+        if (_lastBackPressAt == null ||
+            now.difference(_lastBackPressAt!) > timeout) {
+          _lastBackPressAt = now;
+          SnackbarService.showMessage(
+            AppLocalizations.of(context)!.appuiBackPressExitHint,
+            duration: timeout,
+          );
+          return;
+        }
+      }
       await SystemNavigator.pop();
     }
   }

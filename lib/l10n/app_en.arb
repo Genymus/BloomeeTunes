@@ -240,6 +240,19 @@
   "appuiTitle": "UI & Services",
   "appuiAutoSlideCharts": "Auto Slide Charts",
   "appuiAutoSlideChartsSubtitle": "Slide charts automatically in home screen.",
+  "appuiBackPressExitSectionTitle": "Back Button Exit",
+  "appuiBackPressExitToggleTitle": "Require double back to close",
+  "appuiBackPressExitToggleSubtitle": "On Android home screen, show a confirmation hint before closing the app.",
+  "appuiBackPressExitTimeoutTitle": "Back press timeout",
+  "appuiBackPressExitTimeoutSubtitle": "Press back again within {seconds} seconds to close the app.",
+  "@appuiBackPressExitTimeoutSubtitle": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "appuiBackPressExitHint": "Press back again to close the app.",
   "appuiLastFmPicksSubtitle": "Show suggestions from Last.FM. Login & restart required.",
   "appuiNoChartsAvailable": "No charts available. Load a chart provider plugin.",
   "appuiLoginToLastFm": "Please login to Last.FM first.",

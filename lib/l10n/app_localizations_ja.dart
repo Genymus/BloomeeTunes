@@ -659,6 +659,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appuiAutoSlideChartsSubtitle => 'ホーム画面のチャートを自動で切り替えます。';
 
   @override
+  String get appuiBackPressExitSectionTitle => '戻るボタンで終了';
+
+  @override
+  String get appuiBackPressExitToggleTitle => '2回押してアプリを終了';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      'Androidのホーム画面で終了前に確認メッセージを表示します。';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => '再押下の制限時間';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return '$seconds秒以内にもう一度戻るを押すとアプリを終了します。';
+  }
+
+  @override
+  String get appuiBackPressExitHint => 'もう一度戻るを押すとアプリを終了します。';
+
+  @override
   String get appuiLastFmPicksSubtitle => 'Last.FM のおすすめを表示（ログインと再起動が必要）。';
 
   @override

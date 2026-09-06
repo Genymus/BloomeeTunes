@@ -700,6 +700,29 @@ class AppLocalizationsHi extends AppLocalizations {
       'होम स्क्रीन पर चार्ट्स अपने आप स्लाइड होंगे।';
 
   @override
+  String get appuiBackPressExitSectionTitle => 'बैक बटन से बाहर निकलना';
+
+  @override
+  String get appuiBackPressExitToggleTitle =>
+      'बंद करने के लिए बैक दो बार दबाएँ';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      'Android होम स्क्रीन पर ऐप बंद करने से पहले पुष्टि संदेश दिखाएँ।';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => 'दूसरी बैक दबाने की समय सीमा';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return 'ऐप बंद करने के लिए $seconds सेकंड में फिर से बैक दबाएँ।';
+  }
+
+  @override
+  String get appuiBackPressExitHint =>
+      'ऐप बंद करने के लिए फिर से बैक दबाएँ।';
+
+  @override
   String get appuiLastFmPicksSubtitle =>
       'Last.FM से गानों के सुझाव दिखाएँ। इसके लिए लॉगिन और ऐप को रीस्टार्ट करना ज़रूरी है।';
 

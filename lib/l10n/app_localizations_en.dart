@@ -695,6 +695,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Slide charts automatically in home screen.';
 
   @override
+  String get appuiBackPressExitSectionTitle => 'Back Button Exit';
+
+  @override
+  String get appuiBackPressExitToggleTitle => 'Require double back to close';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      'On Android home screen, show a confirmation hint before closing the app.';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => 'Back press timeout';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return 'Press back again within $seconds seconds to close the app.';
+  }
+
+  @override
+  String get appuiBackPressExitHint => 'Press back again to close the app.';
+
+  @override
   String get appuiLastFmPicksSubtitle =>
       'Show suggestions from Last.FM. Login & restart required.';
 

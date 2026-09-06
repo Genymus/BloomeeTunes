@@ -1320,6 +1320,42 @@ abstract class AppLocalizations {
   /// **'Slide charts automatically in home screen.'**
   String get appuiAutoSlideChartsSubtitle;
 
+  /// No description provided for @appuiBackPressExitSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back Button Exit'**
+  String get appuiBackPressExitSectionTitle;
+
+  /// No description provided for @appuiBackPressExitToggleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Require double back to close'**
+  String get appuiBackPressExitToggleTitle;
+
+  /// No description provided for @appuiBackPressExitToggleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On Android home screen, show a confirmation hint before closing the app.'**
+  String get appuiBackPressExitToggleSubtitle;
+
+  /// No description provided for @appuiBackPressExitTimeoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back press timeout'**
+  String get appuiBackPressExitTimeoutTitle;
+
+  /// No description provided for @appuiBackPressExitTimeoutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Press back again within {seconds} seconds to close the app.'**
+  String appuiBackPressExitTimeoutSubtitle(int seconds);
+
+  /// No description provided for @appuiBackPressExitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press back again to close the app.'**
+  String get appuiBackPressExitHint;
+
   /// No description provided for @appuiLastFmPicksSubtitle.
   ///
   /// In en, this message translates to:

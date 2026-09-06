@@ -5,6 +5,8 @@ class SettingsState extends Equatable {
   final bool settingsReady; // true only after all settings loaded from DB
   final bool autoUpdateNotify;
   final bool autoSlideCharts;
+  final bool androidBackPressExitConfirmEnabled;
+  final int androidBackPressExitConfirmTimeoutMs;
   final String downPath;
   final String downQuality;
   final String strmQuality;
@@ -39,6 +41,8 @@ class SettingsState extends Equatable {
     required this.settingsReady,
     required this.autoUpdateNotify,
     required this.autoSlideCharts,
+    required this.androidBackPressExitConfirmEnabled,
+    required this.androidBackPressExitConfirmTimeoutMs,
     required this.downPath,
     required this.downQuality,
     required this.strmQuality,
@@ -70,6 +74,8 @@ class SettingsState extends Equatable {
     bool? settingsReady,
     bool? autoUpdateNotify,
     bool? autoSlideCharts,
+    bool? androidBackPressExitConfirmEnabled,
+    int? androidBackPressExitConfirmTimeoutMs,
     String? downPath,
     String? downQuality,
     String? strmQuality,
@@ -100,6 +106,12 @@ class SettingsState extends Equatable {
       settingsReady: settingsReady ?? this.settingsReady,
       autoUpdateNotify: autoUpdateNotify ?? this.autoUpdateNotify,
       autoSlideCharts: autoSlideCharts ?? this.autoSlideCharts,
+      androidBackPressExitConfirmEnabled:
+          androidBackPressExitConfirmEnabled ??
+              this.androidBackPressExitConfirmEnabled,
+      androidBackPressExitConfirmTimeoutMs:
+          androidBackPressExitConfirmTimeoutMs ??
+              this.androidBackPressExitConfirmTimeoutMs,
       downPath: downPath ?? this.downPath,
       downQuality: downQuality ?? this.downQuality,
       strmQuality: strmQuality ?? this.strmQuality,
@@ -140,6 +152,8 @@ class SettingsState extends Equatable {
         settingsReady,
         autoUpdateNotify,
         autoSlideCharts,
+        androidBackPressExitConfirmEnabled,
+        androidBackPressExitConfirmTimeoutMs,
         downPath,
         downQuality,
         strmQuality,
@@ -174,6 +188,8 @@ class SettingsInitial extends SettingsState {
           settingsReady: false,
           autoUpdateNotify: false,
           autoSlideCharts: true,
+          androidBackPressExitConfirmEnabled: true,
+          androidBackPressExitConfirmTimeoutMs: 2000,
           downPath: "",
           downQuality: "Medium",
           strmQuality: "High",

@@ -703,6 +703,29 @@ class AppLocalizationsDe extends AppLocalizations {
       'Charts auf dem Startbildschirm automatisch durchwechseln.';
 
   @override
+  String get appuiBackPressExitSectionTitle => 'Zurück-Taste beenden';
+
+  @override
+  String get appuiBackPressExitToggleTitle =>
+      'Doppelt zurück zum Beenden erforderlich';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      'Auf dem Android-Startbildschirm vor dem Schließen einen Hinweis anzeigen.';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => 'Zeitfenster für Zurück-Taste';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return 'Zum Schließen innerhalb von $seconds Sekunden erneut Zurück drücken.';
+  }
+
+  @override
+  String get appuiBackPressExitHint =>
+      'Erneut zurück drücken, um die App zu schließen.';
+
+  @override
   String get appuiLastFmPicksSubtitle =>
       'Vorschläge von Last.FM anzeigen. Login & Neustart erforderlich.';
 

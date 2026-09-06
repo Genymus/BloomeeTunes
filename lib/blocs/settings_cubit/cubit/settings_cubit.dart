@@ -41,129 +41,145 @@ class SettingsCubit extends Cubit<SettingsState> {
         () => _settingsRepo.getSettingBool(SettingKeys.autoSlideCharts),
         SettingKeys.autoSlideCharts,
       ),
-      // [2] downPath - may need async platform call for default
+      // [2] androidBackPressExitConfirmEnabled
+      _readSetting(
+        () => _settingsRepo.getSettingBool(
+          SettingKeys.androidBackPressExitConfirmEnabled,
+          defaultValue: true,
+        ),
+        SettingKeys.androidBackPressExitConfirmEnabled,
+      ),
+      // [3] androidBackPressExitConfirmTimeoutMs
+      _readSetting(
+        () => _settingsRepo.getSettingStr(
+          SettingKeys.androidBackPressExitConfirmTimeoutMs,
+          defaultValue: '2000',
+        ),
+        SettingKeys.androidBackPressExitConfirmTimeoutMs,
+      ),
+      // [4] downPath - may need async platform call for default
       _resolveDownPath(),
-      // [3] downQuality
+      // [5] downQuality
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.downQuality,
             defaultValue: AudioStreamQualityPreference.medium.label),
         SettingKeys.downQuality,
       ),
-      // [4] strmQuality
+      // [6] strmQuality
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.strmQuality),
         SettingKeys.strmQuality,
       ),
-      // [5] historyClearTime
+      // [7] historyClearTime
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.historyClearTime),
         SettingKeys.historyClearTime,
       ),
-      // [6] lastFMScrobble
+      // [8] lastFMScrobble
       _readSetting(
         () => _settingsRepo.getSettingBool(CacheKeys.lFMScrobbleSetting),
         CacheKeys.lFMScrobbleSetting,
       ),
-      // [7] autoPlay
+      // [9] autoPlay
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoPlay),
         SettingKeys.autoPlay,
       ),
-      // [8] autoResolveUnavailableTracks
+      // [10] autoResolveUnavailableTracks
       _readSetting(
         () => _settingsRepo
             .getSettingBool(SettingKeys.autoResolveUnavailableTracks),
         SettingKeys.autoResolveUnavailableTracks,
       ),
-      // [9] lFMPicks
+      // [11] lFMPicks
       _readSetting(
         () => _settingsRepo.getSettingBool(CacheKeys.lFMUIPicks),
         CacheKeys.lFMUIPicks,
       ),
-      // [10] backupPath
+      // [12] backupPath
       _resolveBackupPath(),
-      // [11] autoBackup
+      // [13] autoBackup
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoBackup),
         SettingKeys.autoBackup,
       ),
-      // [12] autoGetCountry
+      // [14] autoGetCountry
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoGetCountry),
         SettingKeys.autoGetCountry,
       ),
-      // [13] languageCode
+      // [15] languageCode
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.languageCode),
         SettingKeys.languageCode,
       ),
-      // [14] countryCode
+      // [16] countryCode
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.countryCode),
         SettingKeys.countryCode,
       ),
-      // [15] autoSaveLyrics
+      // [17] autoSaveLyrics
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoSaveLyrics),
         SettingKeys.autoSaveLyrics,
       ),
-      // [16] chartShowMap
+      // [18] chartShowMap
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.chartShowMap),
         SettingKeys.chartShowMap,
       ),
-      // [17] crossfadeDuration
+      // [19] crossfadeDuration
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.crossfadeDuration),
         SettingKeys.crossfadeDuration,
       ),
-      // [18] eqEnabled
+      // [20] eqEnabled
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.eqEnabled),
         SettingKeys.eqEnabled,
       ),
-      // [19] eqBandGains
+      // [21] eqBandGains
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.eqBandGains),
         SettingKeys.eqBandGains,
       ),
-      // [20] eqPreset
+      // [22] eqPreset
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.eqPreset,
             defaultValue: 'Flat'),
         SettingKeys.eqPreset,
       ),
-      // [21] eqSource
+      // [23] eqSource
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.eqSource,
             defaultValue: EqSourceValues.builtin),
         SettingKeys.eqSource,
       ),
-      // [22] homePluginId
+      // [24] homePluginId
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.homePluginId,
             defaultValue: ''),
         SettingKeys.homePluginId,
       ),
-      // [23] searchPluginId
+      // [25] searchPluginId
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.searchPluginId,
             defaultValue: ''),
         SettingKeys.searchPluginId,
       ),
-      // [24] resolverPriority
+      // [26] resolverPriority
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.resolverPriority,
             defaultValue: '[]'),
         SettingKeys.resolverPriority,
       ),
-      // [25] lyricsPriority
+      // [27] lyricsPriority
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.lyricsPriority,
             defaultValue: '[]'),
         SettingKeys.lyricsPriority,
       ),
-      // [26] suggestionPluginId
+      // [28] suggestionPluginId
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.suggestionPluginId,
             defaultValue: ''),
@@ -172,14 +188,14 @@ class SettingsCubit extends Cubit<SettingsState> {
     ]);
 
     // Normalize stream quality labels.
-    final rawDownQ = results[3] as String?;
+    final rawDownQ = results[5] as String?;
     final normalizedDownQ = normalizeStoredStreamQualityLabel(rawDownQ,
         fallback: AudioStreamQualityPreference.medium.label);
     if (rawDownQ != normalizedDownQ) {
       _settingsRepo.putSettingStr(SettingKeys.downQuality, normalizedDownQ);
     }
 
-    final rawStrmQ = results[4] as String?;
+    final rawStrmQ = results[6] as String?;
     final normalizedStrmQ = normalizeStoredStreamQualityLabel(rawStrmQ,
         fallback: AudioStreamQualityPreference.high.label);
     if (rawStrmQ != normalizedStrmQ) {
@@ -188,7 +204,7 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     // Parse chart map.
     Map chartMap = {};
-    final chartJson = results[16] as String?;
+    final chartJson = results[18] as String?;
     if (chartJson != null) {
       try {
         chartMap = jsonDecode(chartJson);
@@ -196,7 +212,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
 
     // Normalize crossfade duration.
-    final cfStr = results[17] as String?;
+    final cfStr = results[19] as String?;
     final crossfadeSeconds = int.tryParse((cfStr ?? '').trim()) ?? 2;
     if (cfStr != crossfadeSeconds.toString()) {
       _settingsRepo.putSettingStr(
@@ -205,7 +221,7 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     // Parse EQ gains.
     List<double> eqGains = List<double>.filled(10, 0.0);
-    final gainsJson = results[19] as String?;
+    final gainsJson = results[21] as String?;
     if (gainsJson != null) {
       try {
         final decoded = jsonDecode(gainsJson) as List;
@@ -219,7 +235,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     // Parse plugin priority lists.
     List<String> resolverPriority = const [];
     try {
-      final rj = results[24] as String?;
+      final rj = results[26] as String?;
       if (rj != null && rj.isNotEmpty) {
         resolverPriority = (jsonDecode(rj) as List).cast<String>();
       }
@@ -227,14 +243,14 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     List<String> lyricsPriority = const [];
     try {
-      final lj = results[25] as String?;
+      final lj = results[27] as String?;
       if (lj != null && lj.isNotEmpty) {
         lyricsPriority = (jsonDecode(lj) as List).cast<String>();
       }
     } catch (_) {}
 
     // Normalize country code.
-    final rawCountry = results[14] as String?;
+    final rawCountry = results[16] as String?;
     final normalizedCountry =
         CountryInfoService.normalizeCountryCode(rawCountry);
     final resolvedCountry = normalizedCountry.isNotEmpty
@@ -242,7 +258,20 @@ class SettingsCubit extends Cubit<SettingsState> {
         : CountryInfoService.defaultCountryCode;
 
     // Validate EQ source.
-    final rawEqSource = results[21] as String?;
+    final rawEqSource = results[23] as String?;
+
+    final backConfirmTimeoutRaw = results[3] as String?;
+    final backConfirmTimeoutMs = int.tryParse((backConfirmTimeoutRaw ?? '').trim());
+    final normalizedBackConfirmTimeoutMs =
+        backConfirmTimeoutMs == null || backConfirmTimeoutMs < 500
+            ? 2000
+            : backConfirmTimeoutMs;
+    if (backConfirmTimeoutRaw != normalizedBackConfirmTimeoutMs.toString()) {
+      _settingsRepo.putSettingStr(
+        SettingKeys.androidBackPressExitConfirmTimeoutMs,
+        normalizedBackConfirmTimeoutMs.toString(),
+      );
+    }
     final eqSource = rawEqSource == EqSourceValues.device
         ? EqSourceValues.device
         : EqSourceValues.builtin;
@@ -255,31 +284,33 @@ class SettingsCubit extends Cubit<SettingsState> {
       settingsReady: true,
       autoUpdateNotify: (results[0] as bool?) ?? false,
       autoSlideCharts: (results[1] as bool?) ?? true,
-      downPath: results[2] as String,
+      androidBackPressExitConfirmEnabled: (results[2] as bool?) ?? true,
+      androidBackPressExitConfirmTimeoutMs: normalizedBackConfirmTimeoutMs,
+      downPath: results[4] as String,
       downQuality: normalizedDownQ,
       strmQuality: normalizedStrmQ,
-      backupPath: results[10] as String,
-      autoBackup: (results[11] as bool?) ?? false,
-      historyClearTime: (results[5] as String?) ?? '30',
-      autoGetCountry: (results[12] as bool?) ?? true,
-      languageCode: (results[13] as String?) ?? '',
+      backupPath: results[12] as String,
+      autoBackup: (results[13] as bool?) ?? false,
+      historyClearTime: (results[7] as String?) ?? '30',
+      autoGetCountry: (results[14] as bool?) ?? true,
+      languageCode: (results[15] as String?) ?? '',
       countryCode: resolvedCountry,
-      autoSaveLyrics: (results[15] as bool?) ?? false,
-      lFMPicks: (results[9] as bool?) ?? false,
-      lastFMScrobble: (results[6] as bool?) ?? false,
+      autoSaveLyrics: (results[17] as bool?) ?? false,
+      lFMPicks: (results[11] as bool?) ?? false,
+      lastFMScrobble: (results[8] as bool?) ?? false,
       chartMap: Map.from(chartMap),
-      autoPlay: (results[7] as bool?) ?? true,
-      autoResolveUnavailableTracks: (results[8] as bool?) ?? true,
+      autoPlay: (results[9] as bool?) ?? true,
+      autoResolveUnavailableTracks: (results[10] as bool?) ?? true,
       crossfadeDuration: crossfadeSeconds,
-      eqEnabled: (results[18] as bool?) ?? false,
+      eqEnabled: (results[20] as bool?) ?? false,
       eqBandGains: eqGains,
-      eqPreset: (results[20] as String?) ?? 'Flat',
+      eqPreset: (results[22] as String?) ?? 'Flat',
       eqSource: eqSource,
-      homePluginId: (results[22] as String?) ?? '',
-      searchPluginId: (results[23] as String?) ?? '',
+      homePluginId: (results[24] as String?) ?? '',
+      searchPluginId: (results[25] as String?) ?? '',
       resolverPriority: resolverPriority,
       lyricsPriority: lyricsPriority,
-      suggestionPluginId: (results[26] as String?) ?? '',
+      suggestionPluginId: (results[28] as String?) ?? '',
     ));
   }
 
@@ -399,6 +430,23 @@ class SettingsCubit extends Cubit<SettingsState> {
   void setAutoSlideCharts(bool v) {
     _settingsRepo.putSettingBool(SettingKeys.autoSlideCharts, v);
     emit(state.copyWith(autoSlideCharts: v));
+  }
+
+  void setAndroidBackPressExitConfirmEnabled(bool v) {
+    _settingsRepo.putSettingBool(
+      SettingKeys.androidBackPressExitConfirmEnabled,
+      v,
+    );
+    emit(state.copyWith(androidBackPressExitConfirmEnabled: v));
+  }
+
+  void setAndroidBackPressExitConfirmTimeoutMs(int timeoutMs) {
+    final normalized = timeoutMs < 500 ? 500 : timeoutMs;
+    _settingsRepo.putSettingStr(
+      SettingKeys.androidBackPressExitConfirmTimeoutMs,
+      normalized.toString(),
+    );
+    emit(state.copyWith(androidBackPressExitConfirmTimeoutMs: normalized));
   }
 
   void setDownPath(String v) {

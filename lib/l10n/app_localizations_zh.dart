@@ -657,6 +657,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appuiAutoSlideChartsSubtitle => '在首页自动滑动展示榜单。';
 
   @override
+  String get appuiBackPressExitSectionTitle => '返回键退出';
+
+  @override
+  String get appuiBackPressExitToggleTitle => '双击返回键关闭应用';
+
+  @override
+  String get appuiBackPressExitToggleSubtitle =>
+      '在 Android 首页按返回键时，先显示关闭确认提示。';
+
+  @override
+  String get appuiBackPressExitTimeoutTitle => '再次按返回键的时限';
+
+  @override
+  String appuiBackPressExitTimeoutSubtitle(int seconds) {
+    return '请在 $seconds 秒内再次按返回键以关闭应用。';
+  }
+
+  @override
+  String get appuiBackPressExitHint => '再按一次返回键即可关闭应用。';
+
+  @override
   String get appuiLastFmPicksSubtitle => '显示来自 Last.FM 的建议。需要登录并重启。';
 
   @override
