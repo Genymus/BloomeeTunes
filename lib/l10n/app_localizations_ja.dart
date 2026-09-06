@@ -813,6 +813,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get playerSettingAutoFallbackSubtitle => 'エラー時に代替の解決策を試みます。';
 
   @override
+  String get playerSettingReplayCurrentTrack => '現在の曲をリプレイ';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return '再生が ${seconds}s を超えたあとに前へを押すと、現在の曲を最初から再生します。';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => 'リプレイの閾値';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return '再生時間が ${seconds}s を超えたら再スタートします。';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => '無効';
+
+  @override
   String get playerSettingCrossfade => 'クロスフェード';
 
   @override

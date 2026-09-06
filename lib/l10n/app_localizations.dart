@@ -1626,6 +1626,36 @@ abstract class AppLocalizations {
   /// **'If a plugin is missing or returns no streams, try a compatible resolver for playback only.'**
   String get playerSettingAutoFallbackSubtitle;
 
+  /// No description provided for @playerSettingReplayCurrentTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay Current Track'**
+  String get playerSettingReplayCurrentTrack;
+
+  /// No description provided for @playerSettingReplayCurrentTrackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart the current track when you press Previous after {seconds}s of playback.'**
+  String playerSettingReplayCurrentTrackSubtitle(int seconds);
+
+  /// No description provided for @playerSettingReplayCurrentTrackThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay threshold'**
+  String get playerSettingReplayCurrentTrackThreshold;
+
+  /// No description provided for @playerSettingReplayCurrentTrackThresholdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart when playback exceeds {seconds}s.'**
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds);
+
+  /// No description provided for @playerSettingReplayCurrentTrackThresholdDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get playerSettingReplayCurrentTrackThresholdDisabled;
+
   /// No description provided for @playerSettingCrossfade.
   ///
   /// In en, this message translates to:

@@ -870,6 +870,25 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wenn ein Plugin fehlschlägt, wird automatisch ein kompatibler Resolver versucht.';
 
   @override
+  String get playerSettingReplayCurrentTrack => 'Aktuellen Titel erneut abspielen';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return 'Startet den aktuellen Titel neu, wenn du nach ${seconds}s Wiedergabe „Zurück“ drückst.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => 'Wiedergabegrenze';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return 'Neustart, wenn die Wiedergabe ${seconds}s überschreitet.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => 'Deaktiviert';
+
+  @override
   String get playerSettingCrossfade => 'Überblenden';
 
   @override

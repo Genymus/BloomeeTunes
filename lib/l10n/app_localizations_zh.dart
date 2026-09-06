@@ -811,6 +811,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerSettingAutoFallbackSubtitle => '如果插件缺失或无法播放，尝试使用兼容的解析器。';
 
   @override
+  String get playerSettingReplayCurrentTrack => '重播当前曲目';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return '当播放超过 ${seconds}s 并按下上一曲时，重新从开头播放当前曲目。';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => '重播阈值';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return '当播放超过 ${seconds}s 时重新开始。';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => '已禁用';
+
+  @override
   String get playerSettingCrossfade => '淡入淡出';
 
   @override

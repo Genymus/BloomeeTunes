@@ -127,6 +127,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     // Engine settings (EQ, crossfade) restore happens async — acceptable
     // because the first play() will work with defaults until restore completes.
     _restoreEngineSettings();
+    refreshPreviousTrackReplaySettings();
     // Session restore runs after engine settings but does NOT auto-play.
     _restoreLastSession();
   }
@@ -917,18 +918,45 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     await _internalSkipToPrevious();
   }
 
+  bool _previousTrackReplayEnabled = true;
+  int _previousTrackReplayThresholdSeconds = 5;
+
+  Future<void> refreshPreviousTrackReplaySettings() async {
+    final dao = SettingsDAO(DBProvider.db);
+    final enabled = await dao.getSettingBool(
+            SettingKeys.previousTrackReplayEnabled) ??
+        true;
+    final rawThreshold = await dao.getSettingStr(
+        SettingKeys.previousTrackReplayThreshold,
+        defaultValue: '5');
+    _previousTrackReplayEnabled = enabled;
+    _previousTrackReplayThresholdSeconds =
+        int.tryParse((rawThreshold ?? '5').trim()) ?? 5;
+  }
+
+  bool _shouldReplayCurrentTrack() {
+    if (!_previousTrackReplayEnabled) return false;
+    if (_queueManager.currentTrack == null) return false;
+    return engine.position.inSeconds >= _previousTrackReplayThresholdSeconds;
+  }
+
   Future<void> _internalSkipToPrevious() async {
     _isAdvancing = true;
     try {
-      final advanced =
-          _queueManager.advanceToPrevious(loopMode: loopMode.value);
-      if (advanced) {
-        final prev = _queueManager.currentTrack;
-        if (prev != null) await _enqueuePlayTrack(prev, doPlay: true);
+      if (_shouldReplayCurrentTrack()) {
+        await engine.seek(Duration.zero);
+        await engine.play();
       } else {
-        _playCompleter?.operation.cancel();
-        _playCompleter = null;
-        await engine.stop();
+        final advanced =
+            _queueManager.advanceToPrevious(loopMode: loopMode.value);
+        if (advanced) {
+          final prev = _queueManager.currentTrack;
+          if (prev != null) await _enqueuePlayTrack(prev, doPlay: true);
+        } else {
+          _playCompleter?.operation.cancel();
+          _playCompleter = null;
+          await engine.stop();
+        }
       }
     } finally {
       _isAdvancing = false;

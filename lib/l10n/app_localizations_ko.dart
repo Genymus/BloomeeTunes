@@ -813,6 +813,25 @@ class AppLocalizationsKo extends AppLocalizations {
       '사용 중인 플러그인에 오류가 있을 시 다른 호환 소스를 찾습니다.';
 
   @override
+  String get playerSettingReplayCurrentTrack => '현재 트랙 다시 재생';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return '재생 시간이 ${seconds}s를 넘은 상태에서 이전 곡 버튼을 누르면 현재 트랙을 처음부터 다시 재생합니다.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => '재생 재시작 기준';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return '재생 시간이 ${seconds}s를 넘으면 다시 시작합니다.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => '비활성화';
+
+  @override
   String get playerSettingCrossfade => '크로스페이드';
 
   @override

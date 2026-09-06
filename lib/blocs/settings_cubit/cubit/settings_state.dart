@@ -17,6 +17,8 @@ class SettingsState extends Equatable {
   final bool autoSaveLyrics;
   final bool autoPlay;
   final bool autoResolveUnavailableTracks;
+  final bool previousTrackReplayEnabled;
+  final int previousTrackReplayThresholdSeconds;
   final String languageCode;
   final String countryCode;
   final Map chartMap;
@@ -54,6 +56,8 @@ class SettingsState extends Equatable {
     required this.chartMap,
     required this.autoPlay,
     required this.autoResolveUnavailableTracks,
+    required this.previousTrackReplayEnabled,
+    required this.previousTrackReplayThresholdSeconds,
     required this.crossfadeDuration,
     required this.eqEnabled,
     required this.eqBandGains,
@@ -85,6 +89,8 @@ class SettingsState extends Equatable {
     bool? autoSaveLyrics,
     bool? autoPlay,
     bool? autoResolveUnavailableTracks,
+    bool? previousTrackReplayEnabled,
+    int? previousTrackReplayThresholdSeconds,
     int? crossfadeDuration,
     bool? eqEnabled,
     List<double>? eqBandGains,
@@ -116,6 +122,11 @@ class SettingsState extends Equatable {
       autoPlay: autoPlay ?? this.autoPlay,
       autoResolveUnavailableTracks:
           autoResolveUnavailableTracks ?? this.autoResolveUnavailableTracks,
+      previousTrackReplayEnabled:
+          previousTrackReplayEnabled ?? this.previousTrackReplayEnabled,
+      previousTrackReplayThresholdSeconds:
+          previousTrackReplayThresholdSeconds ??
+              this.previousTrackReplayThresholdSeconds,
       crossfadeDuration: crossfadeDuration ?? this.crossfadeDuration,
       eqEnabled: eqEnabled ?? this.eqEnabled,
       eqBandGains: eqBandGains != null
@@ -155,6 +166,8 @@ class SettingsState extends Equatable {
         autoSaveLyrics,
         autoPlay,
         autoResolveUnavailableTracks,
+        previousTrackReplayEnabled,
+        previousTrackReplayThresholdSeconds,
         crossfadeDuration,
         eqEnabled,
         eqBandGains,
@@ -189,6 +202,8 @@ class SettingsInitial extends SettingsState {
           autoSaveLyrics: false,
           autoPlay: true,
           autoResolveUnavailableTracks: true,
+          previousTrackReplayEnabled: true,
+          previousTrackReplayThresholdSeconds: 5,
           crossfadeDuration: 2,
           eqEnabled: false,
           eqBandGains: List<double>.filled(10, 0.0),

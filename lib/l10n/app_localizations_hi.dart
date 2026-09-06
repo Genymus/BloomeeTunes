@@ -868,6 +868,25 @@ class AppLocalizationsHi extends AppLocalizations {
       'यदि कोई प्लगइन काम न करे, तो गाना चलाने के लिए किसी अन्य संगत रिज़ॉल्वर का इस्तेमाल करें।';
 
   @override
+  String get playerSettingReplayCurrentTrack => 'वर्तमान ट्रैक फिर से चलाएँ';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return 'जब आप ${seconds}s प्लेबैक के बाद पिछले ट्रैक बटन दबाते हैं, तो वर्तमान ट्रैक फिर से शुरू हो जाएगा।';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => 'फिर से चलाने की सीमा';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return 'जब प्लेबैक ${seconds}s से अधिक हो तो फिर से शुरू करें।';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => 'अक्षम';
+
+  @override
   String get playerSettingCrossfade => 'क्रॉसफ़ेड (Crossfade)';
 
   @override

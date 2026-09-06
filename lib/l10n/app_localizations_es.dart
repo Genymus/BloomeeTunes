@@ -865,6 +865,25 @@ class AppLocalizationsEs extends AppLocalizations {
       'Si falla un plugin, intentar con otro compatible automáticamente.';
 
   @override
+  String get playerSettingReplayCurrentTrack => 'Repetir pista actual';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return 'Reinicia la pista actual cuando pulsas Anterior después de ${seconds}s de reproducción.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => 'Umbral de repetición';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return 'Reiniciar cuando la reproducción supere ${seconds}s.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => 'Desactivado';
+
+  @override
   String get playerSettingCrossfade => 'Crossfade (Fundido)';
 
   @override

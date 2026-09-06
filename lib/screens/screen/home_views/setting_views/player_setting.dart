@@ -51,6 +51,9 @@ class PlayerSettings extends StatelessWidget {
             prev.autoPlay != curr.autoPlay ||
             prev.autoResolveUnavailableTracks !=
                 curr.autoResolveUnavailableTracks ||
+            prev.previousTrackReplayEnabled != curr.previousTrackReplayEnabled ||
+            prev.previousTrackReplayThresholdSeconds !=
+                curr.previousTrackReplayThresholdSeconds ||
             prev.crossfadeDuration != curr.crossfadeDuration ||
             prev.eqEnabled != curr.eqEnabled ||
             prev.eqPreset != curr.eqPreset,
@@ -104,6 +107,38 @@ class PlayerSettings extends StatelessWidget {
                         .setAutoResolveUnavailableTracks(v),
                   ),
                   const SettingDivider(),
+                  SettingToggleTile(
+                    icon: Icons.replay_rounded,
+                    title: l10n.playerSettingReplayCurrentTrack,
+                    subtitle: l10n.playerSettingReplayCurrentTrackSubtitle(
+                      state.previousTrackReplayThresholdSeconds,
+                    ),
+                    value: state.previousTrackReplayEnabled,
+                    onChanged: (v) {
+                      context
+                          .read<SettingsCubit>()
+                          .setPreviousTrackReplayEnabled(v);
+                      context
+                          .read<BloomeePlayerCubit>()
+                          .bloomeePlayer
+                          .refreshPreviousTrackReplaySettings();
+                    },
+                  ),
+                  const SettingDivider(),
+                  _PreviousTrackReplaySlider(
+                    value: state.previousTrackReplayThresholdSeconds,
+                    enabled: state.previousTrackReplayEnabled,
+                    onChanged: (v) {
+                      context
+                          .read<SettingsCubit>()
+                          .setPreviousTrackReplayThresholdSeconds(v);
+                      context
+                          .read<BloomeePlayerCubit>()
+                          .bloomeePlayer
+                          .refreshPreviousTrackReplaySettings();
+                    },
+                  ),
+                  const SettingDivider(),
                   _CrossfadeSlider(
                     value: state.crossfadeDuration,
                     onChanged: (v) {
@@ -138,6 +173,96 @@ class PlayerSettings extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+// ─── Previous-track replay threshold ───────────────────────────────────────
+
+class _PreviousTrackReplaySlider extends StatelessWidget {
+  final int value;
+  final bool enabled;
+  final ValueChanged<int> onChanged;
+
+  const _PreviousTrackReplaySlider({
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const SettingIconBox(icon: Icons.timelapse_rounded),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.playerSettingReplayCurrentTrackThreshold,
+                      style: const TextStyle(
+                        color: Default_Theme.primaryColor2,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                      ).merge(Default_Theme.secondoryTextStyleMedium),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      enabled
+                          ? l10n.playerSettingReplayCurrentTrackThresholdHint(value)
+                          : l10n.playerSettingReplayCurrentTrackThresholdDisabled,
+                      style: TextStyle(
+                        color: Default_Theme.primaryColor2
+                            .withValues(alpha: 0.5),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ).merge(Default_Theme.secondoryTextStyle),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                enabled ? '${value}s' : l10n.playerSettingReplayCurrentTrackThresholdDisabled,
+                style: const TextStyle(
+                  color: Default_Theme.accentColor2,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ).merge(Default_Theme.secondoryTextStyleMedium),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+              activeTrackColor: Default_Theme.accentColor2,
+              inactiveTrackColor:
+                  Default_Theme.primaryColor2.withValues(alpha: 0.1),
+              thumbColor: Default_Theme.accentColor2,
+              overlayColor: Default_Theme.accentColor2.withValues(alpha: 0.15),
+            ),
+            child: Slider(
+              value: value.toDouble(),
+              min: 0,
+              max: 30,
+              divisions: 30,
+              label: '${value}s',
+              onChanged: enabled ? (v) => onChanged(v.round()) : null,
+            ),
+          ),
+        ],
       ),
     );
   }

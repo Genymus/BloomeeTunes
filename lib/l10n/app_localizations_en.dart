@@ -862,6 +862,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'If a plugin is missing or returns no streams, try a compatible resolver for playback only.';
 
   @override
+  String get playerSettingReplayCurrentTrack => 'Replay Current Track';
+
+  @override
+  String playerSettingReplayCurrentTrackSubtitle(int seconds) {
+    return 'Restart the current track when you press Previous after ${seconds}s of playback.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThreshold => 'Replay threshold';
+
+  @override
+  String playerSettingReplayCurrentTrackThresholdHint(int seconds) {
+    return 'Restart when playback exceeds ${seconds}s.';
+  }
+
+  @override
+  String get playerSettingReplayCurrentTrackThresholdDisabled => 'Disabled';
+
+  @override
   String get playerSettingCrossfade => 'Crossfade';
 
   @override

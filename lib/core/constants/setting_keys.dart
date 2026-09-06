@@ -15,6 +15,10 @@ class SettingKeys {
   static const String autoPlay = "autoPlaySimilarItems";
   static const String autoResolveUnavailableTracks =
       "autoResolveUnavailableTracks";
+  static const String previousTrackReplayEnabled =
+      "previousTrackReplayEnabled";
+  static const String previousTrackReplayThreshold =
+      "previousTrackReplayThreshold";
 
   // ── Crossfade ───────────────────────────────────────────────────────────────
   /// Crossfade duration in seconds (0 = disabled). Stored as String.

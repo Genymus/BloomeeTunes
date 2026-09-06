@@ -169,6 +169,18 @@ class SettingsCubit extends Cubit<SettingsState> {
             defaultValue: ''),
         SettingKeys.suggestionPluginId,
       ),
+      // [27] previousTrackReplayEnabled
+      _readSetting(
+        () => _settingsRepo
+            .getSettingBool(SettingKeys.previousTrackReplayEnabled),
+        SettingKeys.previousTrackReplayEnabled,
+      ),
+      // [28] previousTrackReplayThreshold
+      _readSetting(
+        () => _settingsRepo
+            .getSettingStr(SettingKeys.previousTrackReplayThreshold),
+        SettingKeys.previousTrackReplayThreshold,
+      ),
     ]);
 
     // Normalize stream quality labels.
@@ -201,6 +213,16 @@ class SettingsCubit extends Cubit<SettingsState> {
     if (cfStr != crossfadeSeconds.toString()) {
       _settingsRepo.putSettingStr(
           SettingKeys.crossfadeDuration, crossfadeSeconds.toString());
+    }
+
+    // Normalize previous-track replay threshold.
+    final replayThresholdStr = results[28] as String?;
+    final replayThresholdSeconds =
+        int.tryParse((replayThresholdStr ?? '').trim()) ?? 5;
+    if (replayThresholdStr != replayThresholdSeconds.toString()) {
+      _settingsRepo.putSettingStr(
+          SettingKeys.previousTrackReplayThreshold,
+          replayThresholdSeconds.toString());
     }
 
     // Parse EQ gains.
@@ -270,6 +292,8 @@ class SettingsCubit extends Cubit<SettingsState> {
       chartMap: Map.from(chartMap),
       autoPlay: (results[7] as bool?) ?? true,
       autoResolveUnavailableTracks: (results[8] as bool?) ?? true,
+      previousTrackReplayEnabled: (results[27] as bool?) ?? true,
+      previousTrackReplayThresholdSeconds: replayThresholdSeconds,
       crossfadeDuration: crossfadeSeconds,
       eqEnabled: (results[18] as bool?) ?? false,
       eqBandGains: eqGains,
@@ -359,6 +383,19 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _settingsRepo.putSettingBool(
         SettingKeys.autoResolveUnavailableTracks, v);
     emit(state.copyWith(autoResolveUnavailableTracks: v));
+  }
+
+  Future<void> setPreviousTrackReplayEnabled(bool v) async {
+    await _settingsRepo.putSettingBool(
+        SettingKeys.previousTrackReplayEnabled, v);
+    emit(state.copyWith(previousTrackReplayEnabled: v));
+  }
+
+  Future<void> setPreviousTrackReplayThresholdSeconds(int seconds) async {
+    final normalized = seconds.clamp(0, 30);
+    await _settingsRepo.putSettingStr(
+        SettingKeys.previousTrackReplayThreshold, normalized.toString());
+    emit(state.copyWith(previousTrackReplayThresholdSeconds: normalized));
   }
 
   void setCountryCode(String v) {
