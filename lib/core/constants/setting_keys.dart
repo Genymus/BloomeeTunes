@@ -10,9 +10,9 @@ class SettingKeys {
   static const String autoUpdateNotify = "auto_update_notify";
   static const String autoSlideCharts = "auto_slide_charts";
   static const String androidBackPressExitConfirmEnabled =
-      "androidBackPressExitConfirmEnabled";
+      "android_back_press_exit_confirm_enabled";
   static const String androidBackPressExitConfirmTimeoutMs =
-      "androidBackPressExitConfirmTimeoutMs";
+      "android_back_press_exit_confirm_timeout_ms";
 
   // ── Playback ────────────────────────────────────────────────────────────────
   static const String strmQuality = "streamQuality";
