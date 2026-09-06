@@ -27,7 +27,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get navSearch => 'Ricerca';
 
   @override
-  String get navLocal => 'Locale locale';
+  String get navLocal => 'Locale';
 
   @override
   String get navOffline => 'Offline';
@@ -36,13 +36,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playerEnjoyingFrom => 'Divertimento da';
 
   @override
-  String get playerQueue => 'Que.';
+  String get playerQueue => 'Coda';
 
   @override
   String get playerPlayWithMix => 'Auto-Mix Play';
 
   @override
-  String get playerPlayNext => 'Gioca il prossimo';
+  String get playerPlayNext => 'Riproduci successivo';
 
   @override
   String get playerAddToQueue => 'Aggiungi a Queue';
@@ -60,7 +60,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playerFullscreenLyrics => 'Lirica a schermo intero';
 
   @override
-  String get localMusicTitle => 'Locale locale';
+  String get localMusicTitle => 'Locale';
 
   @override
   String get localMusicGrantPermission => 'Permesso di concessione';
@@ -95,13 +95,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get localMusicShuffle => 'Shuffle';
 
   @override
-  String get localMusicPlayAll => 'Giocare Tutto';
+  String get localMusicPlayAll => 'Riproduci tutto';
 
   @override
   String get localMusicSearchHint => 'Cerca musica locale...';
 
   @override
-  String get localMusicRescanDevice => 'Dispositivo di riscossione';
+  String get localMusicRescanDevice => 'Esegui nuova scansione del dispositivo';
 
   @override
   String get localMusicRemoveFolder => 'Rimuovere la cartella';
@@ -202,7 +202,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playlistAddToQueue => 'Aggiungi Playlist a Queue';
 
   @override
-  String get playlistShare => 'Condividi su Google';
+  String get playlistShare => 'Condividi Playlist';
 
   @override
   String get playlistDelete => 'Eliminare la lista dei giochi';
@@ -223,7 +223,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playlistNoMatchSearch => 'No playlists corrisponde alla tua ricerca';
 
   @override
-  String get playlistCreateNew => 'Creare una nuova lista di riproduzione  ⁇ ';
+  String get playlistCreateNew => 'Crea una nuova playlist 😍';
 
   @override
   String get playlistCreateFirstOne => 'No playlists ancora. Creare uno per iniziare!';
@@ -260,7 +260,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playlistFailedToLoad => 'Non caricate playlist';
 
   @override
-  String get settingsTitle => 'Impostazioni delle impostazioni';
+  String get settingsTitle => 'Impostazioni';
 
   @override
   String get settingsPlugins => 'Plugin';
@@ -317,7 +317,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsStorageSubtitle => 'Backup, Cache, Storia, Ripristino e altro ancora...';
 
   @override
-  String get settingsLanguageCountry => 'Lingua &amp; Paese';
+  String get settingsLanguageCountry => 'Lingua & Paese';
 
   @override
   String get settingsLanguageCountrySubtitle => 'Selezionare la lingua e il paese.';
@@ -559,7 +559,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get searchDiscover => 'Scopri la musica incredibile...';
 
   @override
-  String get searchSources => 'GIUDICI';
+  String get searchSources => 'SORGENTI';
 
   @override
   String get searchNoPlugins => 'No plugin installato';
@@ -583,7 +583,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get exploreRecently => 'Recentemente';
 
   @override
-  String get exploreLastFmPicks => 'Last.Fm Picks';
+  String get exploreLastFmPicks => 'Scelte Last.FM';
 
   @override
   String get exploreFailedToLoad => 'Non è riuscito a caricare le sezioni di casa.';
@@ -723,7 +723,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get downloadSettingResetFolderSubtitle => 'Ripristinare il percorso predefinito download.';
 
   @override
-  String get lastfmTitle => 'Ultimo. FM';
+  String get lastfmTitle => 'Last.FM';
 
   @override
   String get lastfmScrobbleTracks => 'Scrobble Tracks';
@@ -747,10 +747,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get lastfmSteps => 'I passaggi per autenticare: 1. Creare / aprire un account Last.FM alla fine.fm 2. Generare una API key alla fine.fm/api/account/create 3. Inserisci il tuo API Key & Secret sotto 4. Toccare "Start Auth" e approvare nel browser 5. Toccare "Get & Save Session Key" per terminare';
 
   @override
-  String get lastfmApiKey => '# Tat7, chiave #';
+  String get lastfmApiKey => 'Chiave API';
 
   @override
-  String get lastfmApiSecret => '# T7 # Segreto #';
+  String get lastfmApiSecret => 'Segreto API';
 
   @override
   String get lastfmStartAuth => '1. Inizio Auth';
@@ -813,13 +813,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playerSettingQualityHigh => 'Alto.';
 
   @override
-  String get playerSettingPlaybackHeader => 'Gioco d\'azzardo';
+  String get playerSettingPlaybackHeader => 'Riproduzione';
 
   @override
-  String get playerSettingAutoPlay => 'Gioco d\'auto';
+  String get playerSettingAutoPlay => 'Riproduzione automatica';
 
   @override
-  String get playerSettingAutoPlaySubtitle => 'Incidere canzoni simili quando la coda termina.';
+  String get playerSettingAutoPlaySubtitle => 'Accoda brani simili quando la coda termina.';
 
   @override
   String get playerSettingAutoFallback => 'Auto Fallback Riproduzione';
@@ -831,7 +831,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playerSettingCrossfade => 'Crossfade';
 
   @override
-  String get playerSettingCrossfadeOff => 'Fuori!';
+  String get playerSettingCrossfadeOff => 'Disattivato';
 
   @override
   String get playerSettingCrossfadeInstant => 'Tracce commutare istantaneamente';
@@ -1081,18 +1081,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String get updateCheckTitle => 'Controllare gli aggiornamenti';
 
   @override
-  String get updateUpToDate => 'Bloomee ⁇  è aggiornato!!!';
+  String get updateUpToDate => 'Bloomee🌸 è aggiornato!!!';
 
   @override
   String get updateViewPreRelease => 'Guarda gli ultimi Pre-Release';
 
   @override
   String updateCurrentVersion(String curr, String build) {
-    return 'Versione attuale: $curr + $build';
+    return 'Versione attuale: $curr+$build';
   }
 
   @override
-  String get updateNewVersionAvailable => 'La nuova versione di Bloomee ⁇  è ora disponibile!!';
+  String get updateNewVersionAvailable => 'La nuova versione di Bloomee🌸 è ora disponibile!!';
 
   @override
   String updateVersion(String ver, String build) {
@@ -1115,7 +1115,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get timerHours => 'Ore';
 
   @override
-  String get timerMinutes => 'Processo verbale';
+  String get timerMinutes => 'Minuti';
 
   @override
   String get timerSeconds => 'Secondi';
@@ -1124,7 +1124,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get timerStop => 'Stop Timer';
 
   @override
-  String get timerFinishedMessage => 'I brani sono riposati. Sweet Dreams  ⁇ .';
+  String get timerFinishedMessage => 'I brani hanno riposato. Sogni d\'oro 🥰.';
 
   @override
   String get timerGotIt => 'Ricevuto!';
@@ -1156,7 +1156,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playlistTypePlaylist => 'Lista dei giochi';
 
   @override
-  String get playlistYou => 'Tu sei';
+  String get playlistYou => 'Tu';
 
   @override
   String get pluginManagerTitle => 'Plugin';
@@ -1183,7 +1183,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pluginManagerFilterImporters => 'Importatori di contenuti';
 
   @override
-  String get pluginManagerTooltipRefresh => 'Rifiuti';
+  String get pluginManagerTooltipRefresh => 'Aggiorna';
 
   @override
   String get pluginManagerTooltipInstall => 'Installare Plugin';
@@ -1232,16 +1232,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pluginManagerEnablePlugin => 'Abilita Plugin';
 
   @override
-  String get pluginManagerUnloadPlugin => 'Caricare Plugin';
+  String get pluginManagerUnloadPlugin => 'Disattiva Plugin';
 
   @override
-  String get pluginManagerDeleting => 'Deleting...';
+  String get pluginManagerDeleting => 'Eliminazione...';
 
   @override
-  String get pluginManagerApiKeysTitle => '# Le chiavi #';
+  String get pluginManagerApiKeysTitle => 'Chiavi API';
 
   @override
-  String get pluginManagerApiKeysSaved => '# Le chiavi salvate #';
+  String get pluginManagerApiKeysSaved => 'Chiavi API salvate';
 
   @override
   String get pluginManagerSave => 'Salva';
@@ -1403,7 +1403,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get aboutCreativeHighlights => 'Aggiornamenti e punti salienti creativi';
 
   @override
-  String get aboutTipQuote => 'Godere di Bloomee? Una piccola punta lo mantiene fiorire.  ⁇ ';
+  String get aboutTipQuote => 'Ti piace Bloomee? Una piccola mancia lo fa continuare a fiorire. 🌸';
 
   @override
   String get aboutTipButton => 'Ti aiuterò.';
@@ -1481,7 +1481,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get eqTitle => 'Equalizzatore';
 
   @override
-  String get eqResetTooltip => 'Reset to Flat';
+  String get eqResetTooltip => 'Ripristina su Flat';
 
   @override
   String get chartNoItems => 'Nessun elemento in questo grafico';
@@ -1640,13 +1640,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get importMatchOptions => 'Opzioni di corrispondenza';
 
   @override
-  String get importAutoMatched => 'Auto-condizionato';
+  String get importAutoMatched => 'Abbinato automaticamente';
 
   @override
   String get importUserSelected => 'Selezionato';
 
   @override
-  String get importSkipped => 'Scivolo';
+  String get importSkipped => 'Saltato';
 
   @override
   String get importNoMatch => 'Nessun risultato trovato';
@@ -1684,7 +1684,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playlistPinToTop => 'Perno in cima';
 
   @override
-  String get playlistUnpin => 'Un po\'.';
+  String get playlistUnpin => 'Rimuovi da in alto';
 
   @override
   String get snackbarImportingMedia => 'Importazione di MediaItems..';
@@ -1815,7 +1815,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get lyricsSearchPreviewTooltip => 'Anteprima dei testi';
 
   @override
-  String get lyricsSearchSynced => 'SINTESI';
+  String get lyricsSearchSynced => 'SINCRONIZZATO';
 
   @override
   String get lyricsSearchPreviewLoadFailed => 'Non sono riuscito a caricare i testi.';
@@ -1865,7 +1865,7 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get upNextAutoPlay => 'Gioco d\'auto';
+  String get upNextAutoPlay => 'Riproduzione automatica';
 
   @override
   String get tooltipCopyToClipboard => 'Copia a clipboard';
@@ -1880,7 +1880,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get snackbarCannotDeletePlayingSong => 'Impossibile eliminare il brano attualmente in riproduzione';
 
   @override
-  String get playerLoopOff => 'Fuori!';
+  String get playerLoopOff => 'Disattivato';
 
   @override
   String get playerLoopOne => 'Loop One';
