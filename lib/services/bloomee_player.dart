@@ -12,7 +12,9 @@ import 'package:Bloomee/plugins/utils/media_id.dart';
 import 'package:Bloomee/plugins/errors/plugin_exceptions.dart';
 import 'package:Bloomee/screens/widgets/snackbar.dart';
 import 'package:Bloomee/services/db/db_provider.dart';
+import 'package:Bloomee/services/db/dao/playlist_dao.dart';
 import 'package:Bloomee/services/db/dao/settings_dao.dart';
+import 'package:Bloomee/services/db/dao/track_dao.dart';
 import 'package:Bloomee/services/player/media_resolver_service.dart';
 import 'package:Bloomee/services/player/player_engine.dart';
 import 'package:Bloomee/services/player/player_error_handler.dart';
@@ -52,6 +54,14 @@ import 'package:rxdart/rxdart.dart';
 /// so that rapid track skipping never leaves orphaned network requests.
 class BloomeeMusicPlayer extends BaseAudioHandler
     with SeekHandler, QueueHandler {
+  static const String _likeTrackActionName = 'like_current_track';
+  static const MediaControl _likeTrackControl = MediaControl(
+    androidIcon: 'drawable/ic_notification_like',
+    label: 'Like',
+    action: MediaAction.custom,
+    customAction: CustomMediaAction(name: _likeTrackActionName),
+  );
+
   late PlayerEngine engine;
 
   late PlayerErrorHandler _errorHandler;
@@ -418,6 +428,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
         MediaControl.skipToPrevious,
         playing ? MediaControl.pause : MediaControl.play,
         MediaControl.skipToNext,
+        _likeTrackControl,
       ],
       processingState: processingState,
       systemActions: const {
@@ -485,6 +496,24 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   Future<void> seek(Duration position) async {
     if (_isDisposed) return;
     await engine.seek(position);
+  }
+
+  @override
+  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) async {
+    if (_isDisposed) return null;
+    if (name == _likeTrackActionName) {
+      await _addCurrentTrackToLiked();
+    }
+    return null;
+  }
+
+  Future<void> _addCurrentTrackToLiked() async {
+    final track = currentMedia;
+    if (isTrackNull(track)) return;
+    final playlistDao = PlaylistDAO(DBProvider.db, TrackDAO(DBProvider.db));
+    final isAlreadyLiked = await playlistDao.isTrackLiked(track.id);
+    if (isAlreadyLiked) return;
+    await playlistDao.setTrackLiked(track, true);
   }
 
   Future<void> seekNSecForward(Duration n) async {
