@@ -22,34 +22,34 @@ class GlobalFooter extends StatelessWidget {
 
     return PlayerOverlayWrapper(
       child: BackButtonListener(
-        // FIX H-04: Back button priority order:
-        // ① Navigator routes (FullscreenLyricsView, PlayerSettings, TimerView, etc.)
-        // ② UpNext panel collapse
-        // ③ Player overlay hide
-        // ④ GoRouter shell navigation
+        // Back button priority order when the player overlay is open:
+        // ① UpNext panel collapse
+        // ② Player overlay hide
+        // ③ Navigator/router routes (sub-screens shown behind the player)
+        // ④ GoRouter shell navigation (tab switch → home)
         // ⑤ System exit
-        //
-        // Previously the handler short-circuited at step ③ whenever the player
-        // was visible, swallowing Navigator pops and causing sub-screens to
-        // appear orphaned over a hidden/collapsed player.
         onBackButtonPressed: () async {
           final overlayC = context.read<PlayerOverlayCubit>();
           final router = GoRouter.of(context);
 
-          // ① Navigator MUST have first priority — always.
-          if (router.canPop()) {
-            router.pop();
-            return true;
-          }
+          // When the player overlay is visible it covers the entire screen, so
+          // back-navigation must act on it first.  Only after the player is
+          // dismissed do we let the router/Navigator handle the press.
 
-          // ② Collapse UpNext panel if expanded (player must be visible).
+          // ① Collapse UpNext panel if expanded (player must be visible).
           if (overlayC.state && overlayC.collapseUpNextPanel()) {
             return true;
           }
 
-          // ③ Hide the player overlay.
+          // ② Hide the player overlay.
           if (overlayC.state) {
             overlayC.hidePlayer();
+            return true;
+          }
+
+          // ③ Navigator/router routes (sub-screens behind the player).
+          if (router.canPop()) {
+            router.pop();
             return true;
           }
 
@@ -107,18 +107,18 @@ class GlobalFooter extends StatelessWidget {
     final overlayC = context.read<PlayerOverlayCubit>();
     final router = GoRouter.of(context);
 
-    // ① Navigator routes first
-    if (router.canPop()) {
-      router.pop();
+    // ① Collapse UpNext panel
+    if (overlayC.state && overlayC.collapseUpNextPanel()) return;
+
+    // ② Hide player
+    if (overlayC.state) {
+      overlayC.hidePlayer();
       return;
     }
 
-    // ② Collapse UpNext panel
-    if (overlayC.state && overlayC.collapseUpNextPanel()) return;
-
-    // ③ Hide player
-    if (overlayC.state) {
-      overlayC.hidePlayer();
+    // ③ Navigator/router routes
+    if (router.canPop()) {
+      router.pop();
       return;
     }
 
