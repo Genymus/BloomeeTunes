@@ -61,6 +61,9 @@ class SettingKeys {
   /// JSON-encoded last queue state for session resume.
   static const String lastQueueState = 'lastQueueState';
 
+  /// Last visited in-app route location for startup restore.
+  static const String lastRouteLocation = 'lastRouteLocation';
+
   // ── Location / charts ───────────────────────────────────────────────────────
   static const String languageCode = "languageCode";
   static const String autoGetCountry = "autoGetCountry";

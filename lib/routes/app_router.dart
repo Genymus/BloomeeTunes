@@ -19,9 +19,42 @@ import 'package:Bloomee/screens/screen/chart/chart_view.dart';
 /// provides backward-compatible access for existing callers.
 class AppRouter {
   static final globalRouterKey = GlobalKey<NavigatorState>();
+  static const String _defaultLocation = '/Explore';
+  static const List<String> _restorableRoots = [
+    '/Explore',
+    '/Library',
+    '/Search',
+    '/LocalMusic',
+    '/Offline',
+  ];
+  static String _initialLocation = _defaultLocation;
+  static GoRouter? _globalRouter;
 
-  static final globalRouter = GoRouter(
-    initialLocation: '/Explore',
+  static void configureInitialLocation(String? location) {
+    if (_globalRouter != null) return;
+    _initialLocation = normalizeRestorableLocation(location);
+  }
+
+  static String normalizeRestorableLocation(String? location) {
+    if (location == null || location.isEmpty) return _defaultLocation;
+    final uri = Uri.tryParse(location);
+    if (uri == null || !isRestorableLocation(uri.toString())) {
+      return _defaultLocation;
+    }
+    return uri.toString();
+  }
+
+  static bool isRestorableLocation(String? location) {
+    if (location == null || location.isEmpty) return false;
+    final uri = Uri.tryParse(location);
+    if (uri == null) return false;
+    final path = uri.path;
+    return _restorableRoots
+        .any((root) => path == root || path.startsWith('$root/'));
+  }
+
+  static GoRouter get globalRouter => _globalRouter ??= GoRouter(
+    initialLocation: _initialLocation,
     navigatorKey: globalRouterKey,
     routes: [
       GoRoute(

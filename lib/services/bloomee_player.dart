@@ -141,6 +141,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       final restored = await _queueManager.restoreQueueState();
       if (_isDisposed) return; // re-check after await
       if (restored) {
+        setLoopMode(_queueManager.restoredLoopMode);
         final track = _queueManager.currentTrack;
         if (track != null) {
           _updateCurrentTrack(track);
@@ -388,7 +389,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       EasyThrottle.throttle(
         'persist_queue',
         const Duration(seconds: 2),
-        () => unawaited(_queueManager.persistQueueState()),
+        () => unawaited(_queueManager.persistQueueState(loopMode: loopMode.value)),
       );
     });
 
@@ -532,6 +533,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   void setLoopMode(LoopMode mode) {
     loopMode.add(mode);
     engine.setLoopMode(mode);
+    unawaited(_queueManager.persistQueueState(loopMode: loopMode.value));
   }
 
   void setCrossfadeDuration(Duration duration) {
@@ -540,6 +542,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   Future<void> shuffle(bool enabled) async {
     _queueManager.shuffle(enabled);
+    unawaited(_queueManager.persistQueueState(loopMode: loopMode.value));
   }
 
   // ─── Core Play Dispatch ────────────────────────────────────────────────────
@@ -1065,7 +1068,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   @override
   Future<void> onTaskRemoved() async {
     // Always persist queue before the OS kills us — this is our last chance.
-    await _queueManager.persistQueueState();
+    await _queueManager.persistQueueState(loopMode: loopMode.value);
     // Keep playing in background — only stop if nothing is active.
     if (!engine.playing) {
       await stop();

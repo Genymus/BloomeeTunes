@@ -17,6 +17,7 @@ import 'package:Bloomee/plugins/blocs/plugin/plugin_bloc.dart';
 import 'package:Bloomee/plugins/blocs/plugin/plugin_event.dart';
 import 'package:Bloomee/repository/bloomee/download_repository.dart';
 import 'package:Bloomee/repository/bloomee/settings_repository.dart';
+import 'package:Bloomee/core/constants/setting_keys.dart';
 import 'package:Bloomee/services/db/dao/cache_dao.dart';
 import 'package:Bloomee/services/db/dao/download_dao.dart';
 import 'package:Bloomee/services/db/dao/history_dao.dart';
@@ -149,11 +150,18 @@ Future<void> setupPlayerCubit() async {
   bloomeePlayerCubit = BloomeePlayerCubit(player);
 }
 
+Future<void> configureInitialRoute() async {
+  final settingsDao = SettingsDAO(DBProvider.db);
+  final lastRoute = await settingsDao.getSettingStr(SettingKeys.lastRouteLocation);
+  AppRouter.configureInitialLocation(lastRoute);
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GestureBinding.instance.resamplingEnabled = true;
   MediaKit.ensureInitialized();
   await bootstrapApp();
+  await configureInitialRoute();
   setHighRefreshRate();
   await setupPlayerCubit();
   DiscordService.initialize();
@@ -180,6 +188,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _migrationPending = false;
   bool _onboardingPending = false;
   bool _pluginBootstrapPending = false;
+  final SettingsDAO _settingsDao = SettingsDAO(DBProvider.db);
+  String? _lastPersistedRoute;
   // ------------------
 
   @override
@@ -196,6 +206,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _onboardingPending = !OnboardingService.onboardingDone;
     _pluginBootstrapPending = !PluginBootstrapService.bootstrapDone;
     //--------------------------------------------------------------------
+
+    GlobalRoutes.globalRouter.routerDelegate.addListener(_persistCurrentRoute);
+    _persistCurrentRoute();
 
     if (io.Platform.isAndroid) {
       initPlatformState();
@@ -273,12 +286,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    GlobalRoutes.globalRouter.routerDelegate.removeListener(_persistCurrentRoute);
     _intentSub?.cancel();
     bloomeePlayerCubit.close();
     if (io.Platform.isWindows || io.Platform.isLinux || io.Platform.isMacOS) {
       DiscordService.clearPresence();
     }
     super.dispose();
+  }
+
+  void _persistCurrentRoute() {
+    final currentLocation = GlobalRoutes
+        .globalRouter.routeInformationProvider.value.uri
+        .toString();
+    if (!AppRouter.isRestorableLocation(currentLocation)) return;
+    if (_lastPersistedRoute == currentLocation) return;
+    _lastPersistedRoute = currentLocation;
+    unawaited(
+      _settingsDao.putSettingStr(SettingKeys.lastRouteLocation, currentLocation),
+    );
   }
 
   @override

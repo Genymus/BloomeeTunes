@@ -34,6 +34,8 @@ class QueueManager {
   /// and avoid writing back the exact same data we just read.
   bool _isRestoring = false;
   bool get isRestoring => _isRestoring;
+  LoopMode _restoredLoopMode = LoopMode.off;
+  LoopMode get restoredLoopMode => _restoredLoopMode;
 
   // ─── Getters ───────────────────────────────────────────────────────────────
 
@@ -456,7 +458,7 @@ class QueueManager {
   ///
   /// Called from [BloomeeMusicPlayer] via a throttled listener on
   /// [tracksStream], and eagerly in [onTaskRemoved] as a last-chance save.
-  Future<void> persistQueueState() async {
+  Future<void> persistQueueState({LoopMode loopMode = LoopMode.off}) async {
     final tracks = _queue.value;
     if (tracks.isEmpty) return;
     try {
@@ -471,6 +473,8 @@ class QueueManager {
         'trackIds': tracks.map((t) => t.id).toList(),
         'currentIndex': _currentIndex,
         'queueTitle': queueTitle.value,
+        'shuffleEnabled': shuffleMode.value,
+        'loopMode': loopMode.name,
       };
       await dao.putSettingStr(
           SettingKeys.lastQueueState, jsonEncode(queueData));
@@ -511,8 +515,16 @@ class QueueManager {
       final idx = (data['currentIndex'] as int?)
               ?.clamp(0, tracks.length - 1) ??
           0;
+      final restoredShuffle = data['shuffleEnabled'] as bool? ?? false;
+      final restoredLoopRaw = data['loopMode'] as String?;
+      _restoredLoopMode = switch (restoredLoopRaw) {
+        'one' => LoopMode.one,
+        'all' => LoopMode.all,
+        _ => LoopMode.off,
+      };
       _isRestoring = true;
       loadTracks(tracks, idx: idx, playlistName: data['queueTitle'] ?? 'Queue');
+      shuffle(restoredShuffle);
       _isRestoring = false;
       return true;
     } catch (e) {
