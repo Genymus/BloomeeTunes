@@ -214,6 +214,7 @@
 
   "menuAddToPlaylist": "Add to Playlist",
   "menuSmartReplace": "Smart Replace",
+  "menuTrimTrack": "Trim",
   "menuShare": "Share",
   "menuAvailableOffline": "Available Offline",
   "menuDownload": "Download",
@@ -464,6 +465,20 @@
   "segmentsSheetTitle": "Segments",
   "segmentsSheetEmpty": "No segments available",
   "segmentsSheetUntitled": "Untitled Segment",
+
+  "trackTrimOpenEditor": "Trim playback",
+  "trackTrimTitle": "Trim playback range",
+  "trackTrimOriginalDuration": "Original duration",
+  "trackTrimNewDuration": "New duration",
+  "trackTrimStartLabel": "Start",
+  "trackTrimEndLabel": "End",
+  "trackTrimInputHint": "hh:mm:ss, mm:ss, or seconds",
+  "trackTrimCancel": "Cancel",
+  "trackTrimOk": "OK",
+  "trackTrimErrorInvalidFormat": "Enter a valid time format.",
+  "trackTrimErrorMissingDuration": "Original track duration is unavailable.",
+  "trackTrimErrorEndBeforeStart": "End must be greater than start.",
+  "trackTrimErrorEndOutOfBounds": "End must be less than or equal to the original duration.",
 
   "smartReplaceTitle": "Smart Replace",
   "smartReplaceSubtitle": "Choose a playable replacement for \"{title}\" and update saved playlist references.",

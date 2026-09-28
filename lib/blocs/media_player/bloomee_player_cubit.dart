@@ -20,10 +20,10 @@ class BloomeePlayerCubit extends Cubit<BloomeePlayerState> {
 
   void _setupProgressStreams() {
     progressStreams = Rx.combineLatest4(
-      Rx.defer(() => bloomeePlayer.engine.positionStream, reusable: true),
-      Rx.defer(() => bloomeePlayer.engine.durationStream, reusable: true),
-      Rx.defer(() => bloomeePlayer.engine.bufferedStream, reusable: true),
-      Rx.defer(() => bloomeePlayer.engine.playingStream, reusable: true),
+      Rx.defer(() => bloomeePlayer.displayPositionStream, reusable: true),
+      Rx.defer(() => bloomeePlayer.effectiveDurationStream, reusable: true),
+      Rx.defer(() => bloomeePlayer.displayBufferedStream, reusable: true),
+      Rx.defer(() => bloomeePlayer.playingStream, reusable: true),
       (Duration position, Duration duration, Duration buffered, bool playing) =>
           ProgressBarStreams(
         position: position,

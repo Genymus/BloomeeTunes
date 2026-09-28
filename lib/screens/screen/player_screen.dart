@@ -12,7 +12,9 @@ import 'package:Bloomee/screens/widgets/up_next_panel.dart';
 import 'package:Bloomee/screens/widgets/volume_slider.dart';
 import 'package:Bloomee/screens/widgets/media_metadata_links.dart';
 import 'package:Bloomee/screens/screen/player_views/segments_sheet.dart';
+import 'package:Bloomee/screens/screen/player_views/track_trim_dialog.dart';
 import 'package:Bloomee/services/bloomee_player.dart';
+import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -273,13 +275,74 @@ class CoverImageVolSlider extends StatelessWidget {
             child: Center(
               child: AspectRatio(
                 aspectRatio: 1.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: LoadImageCached(
-                    imageUrl: highResUrl,
-                    fallbackUrl: lowResUrl,
-                    fit: BoxFit.contain,
-                  ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: LoadImageCached(
+                          imageUrl: highResUrl,
+                          fallbackUrl: lowResUrl,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: StreamBuilder<TrackTrimConfig>(
+                        stream: bloomeePlayerCubit
+                            .bloomeePlayer.currentTrackTrimStream,
+                        initialData:
+                            bloomeePlayerCubit.bloomeePlayer.currentTrackTrim,
+                        builder: (context, trimSnapshot) {
+                          final l10n = AppLocalizations.of(context)!;
+                          final trimEnabled = trimSnapshot.data?.enabled ?? false;
+                          return Tooltip(
+                            message: l10n.trackTrimOpenEditor,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(20),
+                                onTap: () async {
+                                  final player = bloomeePlayerCubit.bloomeePlayer;
+                                  final track = player.currentTrackInfo;
+                                  if (track.id.isEmpty) return;
+                                  final saved = await showTrackTrimDialog(
+                                    context,
+                                    track: track,
+                                  );
+                                  if (saved != null) {
+                                    await player.saveTrackTrimConfig(
+                                        track, saved);
+                                  }
+                                },
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: trimEnabled
+                                        ? Colors.redAccent
+                                        : Colors.grey.shade800,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.content_cut_rounded,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -110,6 +110,9 @@ class SettingKeys {
   /// JSON-encoded list of directory paths to scan for local audio files.
   static const String localMusicFolders = "localMusicFolders";
 
+  /// Per-track playback trim configuration JSON (`trackTrim:<mediaId>`).
+  static const String trackTrimPrefix = "trackTrim";
+
   /// Whether to auto-scan local music folders on app startup.
   static const String localMusicAutoScan = "localMusicAutoScan";
 

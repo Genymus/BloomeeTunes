@@ -19,6 +19,7 @@ import 'package:Bloomee/screens/widgets/snackbar.dart';
 import 'package:Bloomee/screens/widgets/smart_replace_dialog.dart';
 import 'package:Bloomee/screens/widgets/song_tile.dart';
 import 'package:Bloomee/services/song_metadata_refresh_service.dart';
+import 'package:Bloomee/screens/screen/player_views/track_trim_dialog.dart';
 
 void showMoreBottomSheet(
   BuildContext context,
@@ -231,6 +232,23 @@ class _TrackOptionsBottomSheet extends StatelessWidget {
                             onTap: (ctx) {
                               Navigator.pop(ctx);
                               showSmartReplaceDialog(parentContext, song);
+                            },
+                          ),
+                          _CompactTile(
+                            icon: Icons.content_cut_rounded,
+                            title: l10n.menuTrimTrack,
+                            onTap: (ctx) async {
+                              Navigator.pop(ctx);
+                              final player = parentContext
+                                  .read<BloomeePlayerCubit>()
+                                  .bloomeePlayer;
+                              final saved = await showTrackTrimDialog(
+                                parentContext,
+                                track: song,
+                              );
+                              if (saved != null) {
+                                await player.saveTrackTrimConfig(song, saved);
+                              }
                             },
                           ),
 

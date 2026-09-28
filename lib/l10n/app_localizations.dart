@@ -1182,6 +1182,12 @@ abstract class AppLocalizations {
   /// **'Smart Replace'**
   String get menuSmartReplace;
 
+  /// No description provided for @menuTrimTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Trim'**
+  String get menuTrimTrack;
+
   /// No description provided for @menuShare.
   ///
   /// In en, this message translates to:
@@ -2507,6 +2513,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled Segment'**
   String get segmentsSheetUntitled;
+
+  /// No description provided for @trackTrimOpenEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Trim playback'**
+  String get trackTrimOpenEditor;
+
+  /// No description provided for @trackTrimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trim playback range'**
+  String get trackTrimTitle;
+
+  /// No description provided for @trackTrimOriginalDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Original duration'**
+  String get trackTrimOriginalDuration;
+
+  /// No description provided for @trackTrimNewDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'New duration'**
+  String get trackTrimNewDuration;
+
+  /// No description provided for @trackTrimStartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get trackTrimStartLabel;
+
+  /// No description provided for @trackTrimEndLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get trackTrimEndLabel;
+
+  /// No description provided for @trackTrimInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'hh:mm:ss, mm:ss, or seconds'**
+  String get trackTrimInputHint;
+
+  /// No description provided for @trackTrimCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get trackTrimCancel;
+
+  /// No description provided for @trackTrimOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get trackTrimOk;
+
+  /// No description provided for @trackTrimErrorInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid time format.'**
+  String get trackTrimErrorInvalidFormat;
+
+  /// No description provided for @trackTrimErrorMissingDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Original track duration is unavailable.'**
+  String get trackTrimErrorMissingDuration;
+
+  /// No description provided for @trackTrimErrorEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End must be greater than start.'**
+  String get trackTrimErrorEndBeforeStart;
+
+  /// No description provided for @trackTrimErrorEndOutOfBounds.
+  ///
+  /// In en, this message translates to:
+  /// **'End must be less than or equal to the original duration.'**
+  String get trackTrimErrorEndOutOfBounds;
 
   /// No description provided for @smartReplaceTitle.
   ///

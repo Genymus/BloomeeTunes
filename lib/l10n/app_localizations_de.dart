@@ -633,6 +633,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuSmartReplace => 'Intelligentes Ersetzen';
 
   @override
+  String get menuTrimTrack => 'Trim';
+
+  @override
   String get menuShare => 'Teilen';
 
   @override
@@ -1371,6 +1374,47 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get segmentsSheetUntitled => 'Unbenanntes Segment';
+
+  @override
+  String get trackTrimOpenEditor => 'Trim playback';
+
+  @override
+  String get trackTrimTitle => 'Trim playback range';
+
+  @override
+  String get trackTrimOriginalDuration => 'Original duration';
+
+  @override
+  String get trackTrimNewDuration => 'New duration';
+
+  @override
+  String get trackTrimStartLabel => 'Start';
+
+  @override
+  String get trackTrimEndLabel => 'End';
+
+  @override
+  String get trackTrimInputHint => 'hh:mm:ss, mm:ss, or seconds';
+
+  @override
+  String get trackTrimCancel => 'Cancel';
+
+  @override
+  String get trackTrimOk => 'OK';
+
+  @override
+  String get trackTrimErrorInvalidFormat => 'Enter a valid time format.';
+
+  @override
+  String get trackTrimErrorMissingDuration =>
+      'Original track duration is unavailable.';
+
+  @override
+  String get trackTrimErrorEndBeforeStart => 'End must be greater than start.';
+
+  @override
+  String get trackTrimErrorEndOutOfBounds =>
+      'End must be less than or equal to the original duration.';
 
   @override
   String get smartReplaceTitle => 'Smart Replace';

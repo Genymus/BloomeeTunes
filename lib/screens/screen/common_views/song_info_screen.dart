@@ -9,6 +9,7 @@ import 'package:Bloomee/core/models/exported.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/screens/widgets/media_metadata_links.dart';
 import 'package:Bloomee/services/song_metadata_refresh_service.dart';
+import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:Bloomee/utils/load_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,8 @@ class SongInfoScreen extends StatefulWidget {
 class _SongInfoScreenState extends State<SongInfoScreen> {
   late Track _song;
   bool _isRefreshingMetadata = false;
+  BigInt? _displayDurationMs;
+  final TrackTrimService _trackTrimService = TrackTrimService();
 
   Track get song => _song;
 
@@ -38,6 +41,20 @@ class _SongInfoScreenState extends State<SongInfoScreen> {
   void initState() {
     super.initState();
     _song = widget.song;
+    _displayDurationMs = _song.durationMs;
+    _loadTrimDuration();
+  }
+
+  Future<void> _loadTrimDuration() async {
+    final trim = await _trackTrimService.getConfigForTrack(song);
+    if (!mounted) return;
+    final fallback = song.durationMs?.toInt() ?? 0;
+    final nextMs = trim.enabled
+        ? trim.effectiveDurationMs
+        : (trim.originalDurationMs > 0 ? trim.originalDurationMs : fallback);
+    setState(() {
+      _displayDurationMs = nextMs > 0 ? BigInt.from(nextMs) : song.durationMs;
+    });
   }
 
   String _formatDuration(BigInt? durationMs) {
@@ -86,6 +103,7 @@ class _SongInfoScreenState extends State<SongInfoScreen> {
       setState(() {
         _song = result.track!;
       });
+      _loadTrimDuration();
       SnackbarService.showMessage(l10n.songInfoMetadataUpdated);
     } catch (_) {
       SnackbarService.showMessage(l10n.songInfoMetadataUpdateFailed);
@@ -407,7 +425,7 @@ class _SongInfoScreenState extends State<SongInfoScreen> {
             _DetailRow(
               icon: MingCute.time_fill,
               label: l10n.songInfoLabelDuration,
-              value: _formatDuration(song.durationMs),
+              value: _formatDuration(_displayDurationMs ?? song.durationMs),
             ),
             const _DetailDivider(),
             _DetailRow(

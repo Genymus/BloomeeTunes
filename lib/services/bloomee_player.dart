@@ -19,6 +19,7 @@ import 'package:Bloomee/services/player/player_error_handler.dart';
 import 'package:Bloomee/services/player/queue_manager.dart';
 import 'package:Bloomee/services/player/related_songs_manager.dart';
 import 'package:Bloomee/services/player/recently_played_tracker.dart';
+import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:Bloomee/services/plugin/plugin_service.dart';
 import 'package:Bloomee/services/meta_resolver/smart_track_replacement_service.dart';
 import 'package:Bloomee/services/discord_service.dart';
@@ -60,6 +61,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   late RecentlyPlayedTracker _recentlyPlayedTracker;
   late MediaResolverService _resolver;
   late SmartTrackReplacementService _smartTrackReplacementService;
+  late TrackTrimService _trackTrimService;
 
   // Long-lived stream subjects — kept open to prevent downstream StreamBuilder
   // widgets from entering error state when the player is revived.
@@ -101,12 +103,27 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   // ── M-12 ──────────────────────────────────────────────────────────────────
   Duration _savedPositionForRevive = Duration.zero;
+  TrackTrimConfig _activeTrim = const TrackTrimConfig.disabled();
+  bool _handlingTrimBoundary = false;
+  final BehaviorSubject<TrackTrimConfig> _activeTrimSubject =
+      BehaviorSubject.seeded(const TrackTrimConfig.disabled());
+  final BehaviorSubject<Duration> _effectiveDurationSubject =
+      BehaviorSubject.seeded(Duration.zero);
 
   // ── Modular component accessors ───────────────────────────────────────────
   BehaviorSubject<bool> get shuffleMode => _queueManager.shuffleMode;
   BehaviorSubject<PlayerError?> get lastError => _errorHandler.lastError;
   BehaviorSubject<List<Track>> get relatedSongs =>
       _relatedSongsManager.relatedSongs;
+  Stream<TrackTrimConfig> get currentTrackTrimStream => _activeTrimSubject.stream;
+  TrackTrimConfig get currentTrackTrim => _activeTrimSubject.value;
+  Stream<Duration> get displayPositionStream =>
+      engine.positionStream.map(_toDisplayPosition).distinct();
+  Stream<Duration> get displayBufferedStream =>
+      engine.bufferedStream.map(_toDisplayPosition).distinct();
+  Stream<Duration> get effectiveDurationStream => _effectiveDurationSubject.stream;
+  Duration get effectiveDuration => _effectiveDurationSubject.value;
+  Stream<bool> get playingStream => engine.playingStream;
 
   @override
   BehaviorSubject<String> get queueTitle => _queueManager.queueTitle;
@@ -143,7 +160,9 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       if (restored) {
         final track = _queueManager.currentTrack;
         if (track != null) {
-          _updateCurrentTrack(track);
+          final trimConfig = await _trackTrimService.getConfigForTrack(track);
+          _setActiveTrim(trimConfig);
+          _updateCurrentTrack(_trackTrimService.applyToTrack(track, trimConfig));
         }
       }
     } catch (e) {
@@ -317,6 +336,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     _resolver = MediaResolverService.create(ServiceLocator.pluginService);
     _smartTrackReplacementService =
         SmartTrackReplacementService.create(ServiceLocator.pluginService);
+    _trackTrimService = TrackTrimService();
 
     _errorHandler.onSkipToNext = _internalSkipToNext;
     _errorHandler.onRetryCurrentTrack = _retryCurrentTrack;
@@ -360,6 +380,14 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     // Mark a track as successfully playing only once we see real position
     // advancement — guards circuit breaker against false positives.
     _positionSuccessSub = engine.positionStream.listen((pos) {
+      if (_activeTrim.enabled &&
+          !_handlingTrimBoundary &&
+          !_isAdvancing &&
+          engine.playing &&
+          pos >= _activeTrim.end) {
+        _handleTrimBoundary();
+      }
+
       if (pos > Duration.zero &&
           engine.state == EngineState.ready &&
           engine.playing) {
@@ -402,8 +430,69 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   // ─── Playback State Broadcast ─────────────────────────────────────────────
 
+  Duration _clampDuration(
+      Duration value, Duration min, Duration maxInclusive) {
+    if (value < min) return min;
+    if (value > maxInclusive) return maxInclusive;
+    return value;
+  }
+
+  Duration _toDisplayPosition(Duration absolutePosition) {
+    if (!_activeTrim.enabled) return absolutePosition;
+    final shifted = absolutePosition - _activeTrim.start;
+    return _clampDuration(shifted, Duration.zero, _activeTrim.effectiveDuration);
+  }
+
+  Duration _toAbsolutePosition(Duration displayPosition) {
+    if (!_activeTrim.enabled) return displayPosition;
+    final absolute = _activeTrim.start + displayPosition;
+    return _clampDuration(absolute, _activeTrim.start, _activeTrim.end);
+  }
+
+  Duration _resolveEffectiveDuration([Duration? engineDuration]) {
+    if (_activeTrim.enabled) return _activeTrim.effectiveDuration;
+    final fromTrackMs = _currentTrack.durationMs?.toInt() ?? 0;
+    if (fromTrackMs > 0) return Duration(milliseconds: fromTrackMs);
+    final fallback = engineDuration ?? engine.duration;
+    return fallback > Duration.zero ? fallback : Duration.zero;
+  }
+
+  void _syncEffectiveDuration([Duration? engineDuration]) {
+    final value = _resolveEffectiveDuration(engineDuration);
+    if (_effectiveDurationSubject.value != value) {
+      _effectiveDurationSubject.add(value);
+    }
+  }
+
+  void _setActiveTrim(TrackTrimConfig trimConfig) {
+    _activeTrim = trimConfig;
+    _activeTrimSubject.add(trimConfig);
+    _syncEffectiveDuration();
+  }
+
+  void _handleTrimBoundary() {
+    if (_handlingTrimBoundary || !_activeTrim.enabled) return;
+    _handlingTrimBoundary = true;
+
+    Future.microtask(() async {
+      try {
+        if (loopMode.value == LoopMode.one) {
+          await engine.seek(_activeTrim.start);
+        } else {
+          _onTrackCompleted();
+        }
+      } finally {
+        _handlingTrimBoundary = false;
+      }
+    });
+  }
+
   void _broadcastPlaybackState(EngineState state, bool playing,
       Duration position, Duration buffered, double speed) {
+    final displayPosition = _toDisplayPosition(position);
+    final displayBuffered = _toDisplayPosition(buffered);
+    _syncEffectiveDuration(engine.duration);
+
     final processingState = switch (state) {
       EngineState.idle => AudioProcessingState.idle,
       EngineState.loading => AudioProcessingState.loading,
@@ -427,10 +516,10 @@ class BloomeeMusicPlayer extends BaseAudioHandler
         MediaAction.seek,
       },
       androidCompactActionIndices: const [0, 1, 2],
-      updatePosition: position,
+      updatePosition: displayPosition,
       updateTime: DateTime.now(),
       playing: playing,
-      bufferedPosition: buffered,
+      bufferedPosition: displayBuffered,
       speed: speed,
     ));
 
@@ -447,6 +536,31 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   void _updateCurrentTrack(Track track) {
     _currentTrack = track;
     mediaItem.add(trackToMediaItem(track));
+    _syncEffectiveDuration();
+  }
+
+  Future<TrackTrimConfig> getTrackTrimConfig(Track track) {
+    return _trackTrimService.getConfigForTrack(track);
+  }
+
+  Future<void> saveTrackTrimConfig(Track track, TrackTrimConfig trimConfig) async {
+    await _trackTrimService.saveConfig(track.id, trimConfig);
+    final effectiveTrack = _trackTrimService.applyToTrack(track, trimConfig);
+    _queueManager.replaceTrackById(track.id, effectiveTrack);
+
+    if (_currentTrack.id == track.id) {
+      _setActiveTrim(trimConfig);
+      _updateCurrentTrack(effectiveTrack);
+
+      if (trimConfig.enabled) {
+        final currentPosition = engine.position;
+        if (currentPosition < trimConfig.start) {
+          await engine.seek(trimConfig.start);
+        } else if (currentPosition >= trimConfig.end && !_isAdvancing) {
+          _handleTrimBoundary();
+        }
+      }
+    }
   }
 
   // ─── Public Playback Controls ─────────────────────────────────────────────
@@ -484,19 +598,22 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   @override
   Future<void> seek(Duration position) async {
     if (_isDisposed) return;
-    await engine.seek(position);
+    await engine.seek(_toAbsolutePosition(position));
   }
 
   Future<void> seekNSecForward(Duration n) async {
     if (_isDisposed) return;
-    final dur = engine.duration;
-    await engine.seek(engine.position + n > dur ? dur : engine.position + n);
+    final current = _toDisplayPosition(engine.position);
+    final dur = _resolveEffectiveDuration(engine.duration);
+    final target = current + n;
+    await seek(target > dur ? dur : target);
   }
 
   Future<void> seekNSecBackward(Duration n) async {
     if (_isDisposed) return;
-    final back = engine.position - n;
-    await engine.seek(back < Duration.zero ? Duration.zero : back);
+    final current = _toDisplayPosition(engine.position);
+    final back = current - n;
+    await seek(back < Duration.zero ? Duration.zero : back);
   }
 
   @override
@@ -520,7 +637,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     if (_isDisposed) return;
     if (engine.state == EngineState.ready ||
         engine.state == EngineState.buffering) {
-      await engine.seek(Duration.zero);
+      await seek(Duration.zero);
     } else if (engine.state == EngineState.completed) {
       final track = _queueManager.currentTrack;
       if (track != null) await _enqueuePlayTrack(track, doPlay: true);
@@ -583,12 +700,14 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     if (!alive()) return;
 
     var resolvedTrack = track;
+    var trimConfig = await _trackTrimService.getConfigForTrack(track);
     final canUsePreloaded = engine.isPreloaded &&
         _preloadedTrackId != null &&
         _preloadedTrackId == track.id;
 
     try {
-      _updateCurrentTrack(track);
+      _setActiveTrim(trimConfig);
+      _updateCurrentTrack(_trackTrimService.applyToTrack(track, trimConfig));
 
       if (doPlay) {
         final granted = await _activateAudioSession();
@@ -623,7 +742,10 @@ class BloomeeMusicPlayer extends BaseAudioHandler
         if (resolved == null || !alive()) return;
 
         resolvedTrack = resolved.$1;
-        if (resolvedTrack.id != track.id) _updateCurrentTrack(resolvedTrack);
+        trimConfig = await _trackTrimService.getConfigForTrack(resolvedTrack);
+        _setActiveTrim(trimConfig);
+        _updateCurrentTrack(
+            _trackTrimService.applyToTrack(resolvedTrack, trimConfig));
         isOffline.add(resolved.$2.isOffline);
 
         result = await engine.openDirect(
@@ -647,7 +769,18 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       }
 
       if (initialPosition != null && initialPosition > Duration.zero) {
-        await engine.seek(initialPosition);
+        if (_activeTrim.enabled) {
+          final bounded = _clampDuration(
+            initialPosition,
+            _activeTrim.start,
+            _activeTrim.end,
+          );
+          await engine.seek(bounded);
+        } else {
+          await engine.seek(initialPosition);
+        }
+      } else if (_activeTrim.enabled && _activeTrim.start > Duration.zero) {
+        await engine.seek(_activeTrim.start);
       }
 
       isResolving.add(false);
@@ -857,7 +990,13 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     if (_isDisposed) return;
     queue.add(_queueManager.tracks.map(trackToMediaItem).toList());
     final current = _queueManager.currentTrack;
-    if (current != null) _updateCurrentTrack(current);
+    if (current != null) {
+      _trackTrimService.getConfigForTrack(current).then((trimConfig) {
+        if (_isDisposed) return;
+        _setActiveTrim(trimConfig);
+        _updateCurrentTrack(_trackTrimService.applyToTrack(current, trimConfig));
+      });
+    }
     _broadcastPlaybackState(
       engine.state,
       engine.playing,
@@ -869,9 +1008,14 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   Future<void> replaceTrackInQueue(Track replacement) async {
     if (_isDisposed) return;
-    final changed = _queueManager.replaceTrackById(replacement.id, replacement);
+    final trimConfig = await _trackTrimService.getConfigForTrack(replacement);
+    final effectiveTrack = _trackTrimService.applyToTrack(replacement, trimConfig);
+    final changed = _queueManager.replaceTrackById(replacement.id, effectiveTrack);
     if (!changed) return;
-    if (_currentTrack.id == replacement.id) _updateCurrentTrack(replacement);
+    if (_currentTrack.id == replacement.id) {
+      _setActiveTrim(trimConfig);
+      _updateCurrentTrack(effectiveTrack);
+    }
   }
 
   // ─── Queue Operations ─────────────────────────────────────────────────────
@@ -1116,6 +1260,8 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     fromPlaylist.add(false);
     isOffline.add(false);
     loopMode.add(LoopMode.off);
+    await _activeTrimSubject.close();
+    await _effectiveDurationSubject.close();
 
     await super.stop();
   }
