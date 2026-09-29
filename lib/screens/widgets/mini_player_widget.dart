@@ -7,6 +7,7 @@ import 'package:Bloomee/blocs/mini_player/mini_player_cubit.dart';
 import 'package:Bloomee/blocs/player_overlay/player_overlay_cubit.dart';
 import 'package:Bloomee/core/constants/route_paths.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
+import 'package:Bloomee/screens/widgets/marquee_text.dart';
 import 'package:Bloomee/screens/widgets/media_metadata_links.dart';
 import 'package:Bloomee/utils/load_image.dart';
 import 'package:flutter/material.dart';
@@ -366,8 +367,8 @@ class _TrackInfo extends StatelessWidget {
               const SizedBox(width: 7),
             ],
             Expanded(
-              child: Text(
-                song.title,
+              child: AutoScrollingSingleLineText(
+                text: song.title,
                 style: const TextStyle(
                   fontFamily: 'Unageo',
                   fontSize: 14,
@@ -375,8 +376,6 @@ class _TrackInfo extends StatelessWidget {
                   color: Colors.white,
                   letterSpacing: 0.2,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

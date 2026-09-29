@@ -7,6 +7,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:Bloomee/l10n/app_localizations.dart';
 
 import 'package:Bloomee/screens/screen/common_views/song_info_screen.dart';
+import 'package:Bloomee/screens/widgets/marquee_text.dart';
 import 'package:Bloomee/screens/widgets/snackbar.dart';
 import 'package:Bloomee/blocs/downloader/cubit/downloader_cubit.dart';
 import 'package:Bloomee/blocs/media_player/bloomee_player_cubit.dart';
@@ -156,9 +157,9 @@ class SongCardWidget extends StatelessWidget {
                               fontFamily:
                                   Default_Theme.secondoryTextStyle.fontFamily,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            child: Text(song.title),
+                            child: AutoScrollingSingleLineText(
+                              text: song.title,
+                            ),
                           ),
                           const SizedBox(height: 3),
                           if (subtitleOverride != null)

@@ -7,6 +7,7 @@ import 'package:Bloomee/core/adapters/track_adapter.dart';
 import 'package:Bloomee/screens/screen/home_views/timer_view.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_views/player_setting.dart';
 import 'package:Bloomee/screens/widgets/gradient_progress_bar.dart';
+import 'package:Bloomee/screens/widgets/marquee_text.dart';
 import 'package:Bloomee/screens/widgets/more_bottom_sheet.dart';
 import 'package:Bloomee/screens/widgets/up_next_panel.dart';
 import 'package:Bloomee/screens/widgets/volume_slider.dart';
@@ -328,12 +329,9 @@ class _SongInfoRow extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    currentTrack.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        Default_Theme.secondoryTextStyle.merge(const TextStyle(
+                  AutoScrollingSingleLineText(
+                    text: currentTrack.title,
+                    style: Default_Theme.secondoryTextStyle.merge(const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: Default_Theme.primaryColor1,
