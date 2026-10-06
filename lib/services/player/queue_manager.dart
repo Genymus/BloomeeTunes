@@ -29,6 +29,11 @@ class QueueManager {
   int _shuffleIndex = 0;
   List<int> _shuffleList = [];
 
+  /// Number of tracks in the queue as of the last [loadTracks] call.
+  /// Tracks added after that point (e.g. related songs) are beyond this count.
+  int _playlistTrackCount = 0;
+  int get playlistTrackCount => _playlistTrackCount;
+
   /// True while [restoreQueueState] is populating the queue from disk.
   /// [BloomeeMusicPlayer] checks this to skip the persistence listener
   /// and avoid writing back the exact same data we just read.
@@ -194,9 +199,14 @@ class QueueManager {
 
     _queue.add(deduped);
     queueTitle.add(playlistName);
+    _playlistTrackCount = deduped.length;
 
-    final shouldShuffle = shuffling || shuffleMode.value;
+    final prevShuffle = shuffleMode.value;
+    final shouldShuffle = shuffling || prevShuffle;
     shuffleMode.add(shouldShuffle);
+    print('[SHUFFLE][QueueManager] loadTracks: playlist="$playlistName" '
+        'tracks=${deduped.length} shuffling=$shuffling '
+        'prevShuffleMode=$prevShuffle -> shouldShuffle=$shouldShuffle');
 
     if (shouldShuffle && deduped.isNotEmpty) {
       _shuffleList = generateRandomIndices(deduped.length);
@@ -218,7 +228,10 @@ class QueueManager {
 
   /// Toggle shuffle mode.
   void shuffle(bool enabled) {
+    print('[SHUFFLE][QueueManager] shuffle(enabled=$enabled) '
+        'queueLength=${_queue.value.length} currentIndex=$_currentIndex');
     shuffleMode.add(enabled);
+    _persistShuffleMode(enabled);
     if (enabled && _queue.value.isNotEmpty) {
       _shuffleList = generateRandomIndices(_queue.value.length);
       // Put current track at shuffle index 0.
@@ -228,6 +241,19 @@ class QueueManager {
         _shuffleList.insert(0, _currentIndex);
       }
       _shuffleIndex = 0;
+    } else {
+      _shuffleList = [];
+      _shuffleIndex = 0;
+    }
+  }
+
+  /// Persist shuffle mode to settings so it survives app restarts.
+  Future<void> _persistShuffleMode(bool enabled) async {
+    try {
+      final dao = SettingsDAO(DBProvider.db);
+      await dao.putSettingBool(SettingKeys.shuffleMode, enabled);
+    } catch (e) {
+      log('Failed to persist shuffle mode: $e', name: 'QueueManager');
     }
   }
 
@@ -439,10 +465,45 @@ class QueueManager {
 
   void _ensureShuffleListValid() {
     if (_shuffleList.isEmpty || _shuffleList.length != _queue.value.length) {
+      print('[SHUFFLE][QueueManager] _ensureShuffleListValid: '
+          'shuffleList invalid (len=${_shuffleList.length}, queueLen=${_queue.value.length}), regenerating');
       log('Shuffle list invalid, regenerating', name: 'QueueManager');
       _shuffleList = generateRandomIndices(_queue.value.length);
       _shuffleIndex = _shuffleList.indexOf(_currentIndex);
       if (_shuffleIndex == -1) _shuffleIndex = 0;
+    }
+  }
+
+  /// Remove tracks that were appended after the initial playlist load
+  /// (e.g. related songs). Tracks at indices < [_playlistTrackCount] are kept.
+  /// Safe to call while playing: the current track is never removed.
+  void trimToPlaylistSize() {
+    if (_playlistTrackCount <= 0 ||
+        _queue.value.length <= _playlistTrackCount) {
+      return;
+    }
+    print('[SHUFFLE][QueueManager] trimToPlaylistSize: '
+        'trimming queue from ${_queue.value.length} to $_playlistTrackCount tracks');
+    final trimmed = _queue.value.sublist(0, _playlistTrackCount);
+    _queue.add(trimmed);
+    // Fix currentIndex in case it fell in the trimmed range (shouldn't happen
+    // normally because related songs are always appended after the current
+    // track, but guard just in case).
+    if (_currentIndex >= trimmed.length) {
+      _currentIndex = trimmed.length - 1;
+    }
+    // Rebuild the shuffle list from scratch so it only contains valid indices.
+    if (shuffleMode.value && trimmed.isNotEmpty) {
+      _shuffleList = generateRandomIndices(trimmed.length);
+      final pos = _shuffleList.indexOf(_currentIndex);
+      if (pos != -1 && pos != 0) {
+        _shuffleList.removeAt(pos);
+        _shuffleList.insert(0, _currentIndex);
+      }
+      _shuffleIndex = 0;
+    } else {
+      _shuffleList = [];
+      _shuffleIndex = 0;
     }
   }
 
@@ -511,8 +572,16 @@ class QueueManager {
       final idx = (data['currentIndex'] as int?)
               ?.clamp(0, tracks.length - 1) ??
           0;
+      // Restore shuffle mode that was persisted at last shutdown.
+      final savedShuffle =
+          await dao.getSettingBool(SettingKeys.shuffleMode) ?? false;
+      print('[SHUFFLE][QueueManager] restoreQueueState: '
+          'savedShuffle=$savedShuffle tracks=${tracks.length}');
       _isRestoring = true;
-      loadTracks(tracks, idx: idx, playlistName: data['queueTitle'] ?? 'Queue');
+      loadTracks(tracks,
+          idx: idx,
+          playlistName: data['queueTitle'] ?? 'Queue',
+          shuffling: savedShuffle);
       _isRestoring = false;
       return true;
     } catch (e) {

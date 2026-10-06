@@ -100,6 +100,8 @@ class _PlaylistViewState extends State<PlaylistView> {
         await context.read<CurrentPlaylistCubit>().ensureAllTracksLoaded();
     if (!mounted || fullPlaylist.tracks.isEmpty) return;
 
+    print('[SHUFFLE][PlaylistScreen] _playFromPlaylist: '
+        'playlist="${fullPlaylist.title}" shuffling=$shuffle');
     context.read<BloomeePlayerCubit>().bloomeePlayer.loadPlaylist(
           Playlist(tracks: fullPlaylist.tracks, title: fullPlaylist.title),
           idx: index ?? 0,

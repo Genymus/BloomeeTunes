@@ -179,6 +179,8 @@ class _KeyboardShortcutsHandlerState extends State<KeyboardShortcutsHandler> {
 
     if (key == LogicalKeyboardKey.keyS) {
       final newShuffleState = !player.shuffleMode.value;
+      print('[SHUFFLE][KeyboardShortcuts] S key pressed: '
+          'currentShuffle=${player.shuffleMode.value} -> $newShuffleState');
       player.shuffle(newShuffleState);
       context.read<ShortcutIndicatorCubit>().showShuffle(newShuffleState);
       return true;

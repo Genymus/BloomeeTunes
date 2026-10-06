@@ -539,6 +539,15 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   }
 
   Future<void> shuffle(bool enabled) async {
+    print('[SHUFFLE][BloomeeMusicPlayer] shuffle(enabled=$enabled) '
+        'queueLen=${_queueManager.length} fromPlaylist=${fromPlaylist.value}');
+    if (enabled) {
+      // Remove related songs that may have been silently appended to the queue
+      // while playing the last tracks of the playlist. Without this, the shuffle
+      // would include "radio" tracks that are outside the original playlist.
+      _queueManager.trimToPlaylistSize();
+      _relatedSongsManager.clearRelatedSongs();
+    }
     _queueManager.shuffle(enabled);
   }
 
@@ -983,6 +992,9 @@ class BloomeeMusicPlayer extends BaseAudioHandler
         newIdx = pos != -1 ? pos : 0;
       }
 
+      print('[SHUFFLE][BloomeeMusicPlayer] loadPlaylist: '
+          'playlist="${playlist.title}" tracks=${sanitized.length} '
+          'shuffling=$shuffling currentShuffleMode=${_queueManager.shuffleMode.value}');
       _queueManager.loadTracks(sanitized,
           playlistName: playlist.title, idx: newIdx, shuffling: shuffling);
       queueTitle.add(playlist.title);

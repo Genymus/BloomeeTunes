@@ -61,6 +61,9 @@ class SettingKeys {
   /// JSON-encoded last queue state for session resume.
   static const String lastQueueState = 'lastQueueState';
 
+  /// Whether shuffle mode was active when the app last closed. Stored as bool.
+  static const String shuffleMode = 'shuffleMode';
+
   // ── Location / charts ───────────────────────────────────────────────────────
   static const String languageCode = "languageCode";
   static const String autoGetCountry = "autoGetCountry";

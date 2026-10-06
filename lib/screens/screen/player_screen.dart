@@ -686,7 +686,11 @@ class _ShuffleControl extends StatelessWidget {
                 : Default_Theme.primaryColor1,
             size: 28,
           ),
-          onPressed: () => player.shuffle(!isShuffle),
+          onPressed: () {
+            print('[SHUFFLE][PlayerScreen] user tapped shuffle: '
+                'isShuffle=$isShuffle -> toggling to ${!isShuffle}');
+            player.shuffle(!isShuffle);
+          },
         );
       },
     );

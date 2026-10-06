@@ -286,14 +286,19 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                 _ActionChipButton(
                   icon: MingCute.shuffle_line,
                   label: AppLocalizations.of(context)!.localMusicShuffle,
-                  onTap: () => context
-                      .read<BloomeePlayerCubit>()
-                      .bloomeePlayer
-                      .loadPlaylist(
-                        Playlist(tracks: displayedTracks, title: 'Local Music'),
-                        doPlay: true,
-                        shuffling: true,
-                      ),
+                  onTap: () {
+                    print('[SHUFFLE][LocalMusicScreen] Shuffle button tapped: '
+                        'tracks=${displayedTracks.length}');
+                    context
+                        .read<BloomeePlayerCubit>()
+                        .bloomeePlayer
+                        .loadPlaylist(
+                          Playlist(
+                              tracks: displayedTracks, title: 'Local Music'),
+                          doPlay: true,
+                          shuffling: true,
+                        );
+                  },
                 ),
                 const SizedBox(width: 8),
                 _ActionChipButton(
