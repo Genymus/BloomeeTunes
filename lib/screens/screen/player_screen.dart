@@ -313,8 +313,20 @@ class CoverImageVolSlider extends StatelessWidget {
                                     track: track,
                                   );
                                   if (saved != null) {
-                                    await player.saveTrackTrimConfig(
-                                        track, saved);
+                                    if (saved.duplicateTrack) {
+                                      final (duplicateTrack, _) = await player
+                                          .createTrimmedDuplicateTrack(
+                                        track,
+                                        saved.config,
+                                      );
+                                      await player.insertQueueTrack(
+                                          0, duplicateTrack);
+                                    } else {
+                                      await player.saveTrackTrimConfig(
+                                        track,
+                                        saved.config,
+                                      );
+                                    }
                                   }
                                 },
                                 child: Container(

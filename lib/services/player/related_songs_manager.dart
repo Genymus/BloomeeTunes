@@ -5,6 +5,7 @@ import 'package:Bloomee/core/constants/setting_keys.dart';
 import 'package:Bloomee/services/db/db_provider.dart';
 import 'package:Bloomee/services/db/dao/settings_dao.dart';
 import 'package:Bloomee/services/player/player_engine.dart';
+import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:Bloomee/services/plugin/plugin_service.dart';
 import 'package:Bloomee/src/rust/api/plugin/commands.dart';
 import 'package:rxdart/rxdart.dart';
@@ -47,7 +48,8 @@ class RelatedSongsManager {
       return;
     }
 
-    final parts = tryParseMediaId(currentMedia.id);
+    final sourceMediaId = TrackTrimService.resolveSourceMediaId(currentMedia.id);
+    final parts = tryParseMediaId(sourceMediaId);
     if (parts == null) {
       return;
     }
@@ -58,7 +60,7 @@ class RelatedSongsManager {
     }
 
     _syncReferenceState(
-      trackId: currentMedia.id,
+      trackId: sourceMediaId,
       pluginId: parts.pluginId,
       localId: parts.localId,
     );

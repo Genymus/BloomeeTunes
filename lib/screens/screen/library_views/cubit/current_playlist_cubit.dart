@@ -267,6 +267,13 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
     emit(state.copyWith(playlist: _playlist));
   }
 
+  Future<void> addTrackAtTop(Track track) async {
+    if (_playlist == null || _playlistId == null) return;
+    final loaded = await ensureAllTracksLoaded();
+    final updatedTracks = <Track>[track, ...loaded.tracks];
+    await updatePlaylist(updatedTracks);
+  }
+
   /// Returns the name of the currently loaded playlist, or null if none.
   String? get currentPlaylistName => _playlist?.title;
 }

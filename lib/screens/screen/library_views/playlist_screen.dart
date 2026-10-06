@@ -693,6 +693,26 @@ class _PlaylistViewState extends State<PlaylistView> {
                 onDelete: () => _removeTrack(context, track),
                 showDelete: true,
                 showSinglePlay: true,
+                onTrimConfirmed: (song, result) async {
+                  final player = context.read<BloomeePlayerCubit>().bloomeePlayer;
+                  final cubit = context.read<CurrentPlaylistCubit>();
+                  if (result.duplicateTrack) {
+                    final (duplicateTrack, _) =
+                        await player.createTrimmedDuplicateTrack(
+                      song,
+                      result.config,
+                    );
+                    await cubit.addTrackAtTop(duplicateTrack);
+                    await player.insertQueueTrack(0, duplicateTrack);
+                    return;
+                  }
+
+                  final updatedTrack = await player.saveTrackTrimConfig(
+                    song,
+                    result.config,
+                  );
+                  cubit.replaceTrack(song, updatedTrack);
+                },
               ),
             ),
           );

@@ -29,6 +29,8 @@ void showMoreBottomSheet(
   bool showAddToQueue = true,
   bool showPlayNext = true,
   VoidCallback? onDelete,
+  Future<void> Function(Track song, TrackTrimDialogResult result)?
+      onTrimConfirmed,
 }) {
   final playerCubit = context.read<BloomeePlayerCubit>();
   final libraryCubit = context.read<LibraryItemsCubit>();
@@ -62,6 +64,7 @@ void showMoreBottomSheet(
           showAddToQueue: showAddToQueue,
           showPlayNext: showPlayNext,
           onDelete: onDelete,
+          onTrimConfirmed: onTrimConfirmed,
           parentContext: context,
         ),
       );
@@ -76,6 +79,8 @@ class _TrackOptionsBottomSheet extends StatelessWidget {
   final bool showAddToQueue;
   final bool showPlayNext;
   final VoidCallback? onDelete;
+  final Future<void> Function(Track song, TrackTrimDialogResult result)?
+      onTrimConfirmed;
   final BuildContext parentContext;
 
   const _TrackOptionsBottomSheet({
@@ -85,6 +90,7 @@ class _TrackOptionsBottomSheet extends StatelessWidget {
     required this.showAddToQueue,
     required this.showPlayNext,
     required this.parentContext,
+    required this.onTrimConfirmed,
     this.onDelete,
   });
 
@@ -247,7 +253,24 @@ class _TrackOptionsBottomSheet extends StatelessWidget {
                                 track: song,
                               );
                               if (saved != null) {
-                                await player.saveTrackTrimConfig(song, saved);
+                                if (onTrimConfirmed != null) {
+                                  await onTrimConfirmed!(song, saved);
+                                  return;
+                                }
+                                if (saved.duplicateTrack) {
+                                  final (duplicateTrack, _) = await player
+                                      .createTrimmedDuplicateTrack(
+                                    song,
+                                    saved.config,
+                                  );
+                                  await player.insertQueueTrack(
+                                      0, duplicateTrack);
+                                } else {
+                                  await player.saveTrackTrimConfig(
+                                    song,
+                                    saved.config,
+                                  );
+                                }
                               }
                             },
                           ),

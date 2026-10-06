@@ -4,6 +4,7 @@ import 'package:Bloomee/plugins/utils/media_id.dart';
 import 'package:Bloomee/services/bloomee_player.dart';
 import 'package:Bloomee/services/db/dao/track_dao.dart';
 import 'package:Bloomee/services/db/db_provider.dart';
+import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:Bloomee/src/rust/api/plugin/commands.dart';
 import 'package:Bloomee/src/rust/api/plugin/types.dart';
 
@@ -30,7 +31,9 @@ class SongMetadataRefreshService {
     Track track, {
     BloomeeMusicPlayer? player,
   }) async {
-    final parts = tryParseMediaId(track.id);
+    final trimService = TrackTrimService();
+    final sourceMediaId = TrackTrimService.resolveSourceMediaId(track.id);
+    final parts = tryParseMediaId(sourceMediaId);
     if (parts == null) {
       return const SongMetadataRefreshResult(
         status: SongMetadataRefreshStatus.invalidMediaId,
@@ -71,13 +74,24 @@ class SongMetadataRefreshService {
       final refreshedTrack = response.field0;
       await TrackDAO(DBProvider.db).upsertTrack(refreshedTrack);
 
+      final activeTrimConfig = await trimService.getConfigForMediaId(
+        track.id,
+        fallbackOriginalDurationMs: track.durationMs?.toInt() ?? 0,
+      );
+      final effectiveTrack = trimService.applyToTrack(
+        refreshedTrack,
+        activeTrimConfig,
+        mediaId: track.id,
+        fallbackSourceMediaId: sourceMediaId,
+      );
+
       if (player != null) {
-        await player.replaceTrackInQueue(refreshedTrack);
+        await player.replaceTrackInQueue(effectiveTrack);
       }
 
       return SongMetadataRefreshResult(
         status: SongMetadataRefreshStatus.success,
-        track: refreshedTrack,
+        track: effectiveTrack,
       );
     } catch (_) {
       return const SongMetadataRefreshResult(

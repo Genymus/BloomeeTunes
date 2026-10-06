@@ -1388,6 +1388,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get trackTrimNewDuration => 'New duration';
 
   @override
+  String get trackTrimTitleFieldLabel => 'Track name';
+
+  @override
+  String get trackTrimTitleFieldHint => 'Enter a track name';
+
+  @override
   String get trackTrimStartLabel => 'Start';
 
   @override
@@ -1397,10 +1403,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get trackTrimInputHint => 'hh:mm:ss, mm:ss, or seconds';
 
   @override
+  String get trackTrimDuplicateTrack => 'Duplicate track and keep original';
+
+  @override
   String get trackTrimCancel => 'Cancel';
 
   @override
   String get trackTrimOk => 'OK';
+
+  @override
+  String get trackTrimErrorInvalidTitle => 'Enter a valid track name.';
 
   @override
   String get trackTrimErrorInvalidFormat => 'Enter a valid time format.';

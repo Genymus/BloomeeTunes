@@ -13,6 +13,7 @@ import 'package:Bloomee/plugins/errors/plugin_exceptions.dart';
 import 'package:Bloomee/screens/widgets/snackbar.dart';
 import 'package:Bloomee/services/db/db_provider.dart';
 import 'package:Bloomee/services/db/dao/settings_dao.dart';
+import 'package:Bloomee/services/db/dao/track_dao.dart';
 import 'package:Bloomee/services/player/media_resolver_service.dart';
 import 'package:Bloomee/services/player/player_engine.dart';
 import 'package:Bloomee/services/player/player_error_handler.dart';
@@ -543,24 +544,57 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     return _trackTrimService.getConfigForTrack(track);
   }
 
-  Future<void> saveTrackTrimConfig(Track track, TrackTrimConfig trimConfig) async {
-    await _trackTrimService.saveConfig(track.id, trimConfig);
-    final effectiveTrack = _trackTrimService.applyToTrack(track, trimConfig);
+  Future<Track> saveTrackTrimConfig(Track track, TrackTrimConfig trimConfig) async {
+    final normalizedConfig = _trackTrimService.normalizeConfig(
+      track.id,
+      trimConfig,
+    );
+    await _trackTrimService.saveConfig(track.id, normalizedConfig);
+    final effectiveTrack = _trackTrimService.applyToTrack(track, normalizedConfig);
+    await TrackDAO(DBProvider.db).upsertTrack(effectiveTrack);
     _queueManager.replaceTrackById(track.id, effectiveTrack);
 
     if (_currentTrack.id == track.id) {
-      _setActiveTrim(trimConfig);
+      _setActiveTrim(normalizedConfig);
       _updateCurrentTrack(effectiveTrack);
 
-      if (trimConfig.enabled) {
+      if (normalizedConfig.enabled) {
         final currentPosition = engine.position;
-        if (currentPosition < trimConfig.start) {
-          await engine.seek(trimConfig.start);
-        } else if (currentPosition >= trimConfig.end && !_isAdvancing) {
+        if (currentPosition < normalizedConfig.start) {
+          await engine.seek(normalizedConfig.start);
+        } else if (currentPosition >= normalizedConfig.end && !_isAdvancing) {
           _handleTrimBoundary();
         }
       }
+
+      return effectiveTrack;
     }
+  }
+
+  Future<(Track, TrackTrimConfig)> createTrimmedDuplicateTrack(
+    Track sourceTrack,
+    TrackTrimConfig trimConfig,
+  ) async {
+    final normalized = _trackTrimService.normalizeConfig(
+      sourceTrack.id,
+      trimConfig,
+    );
+    final sourceMediaId = TrackTrimService.resolveSourceMediaId(
+      sourceTrack.id,
+      configuredSourceMediaId: normalized.sourceMediaId,
+    );
+    final duplicateId = _trackTrimService.buildVariantMediaId(sourceMediaId);
+    final duplicateConfig = normalized.copyWith(sourceMediaId: sourceMediaId);
+
+    await _trackTrimService.saveConfig(duplicateId, duplicateConfig);
+    final duplicateTrack = _trackTrimService.applyToTrack(
+      sourceTrack,
+      duplicateConfig,
+      mediaId: duplicateId,
+      fallbackSourceMediaId: sourceMediaId,
+    );
+    await TrackDAO(DBProvider.db).upsertTrack(duplicateTrack);
+    return (duplicateTrack, duplicateConfig);
   }
 
   // ─── Public Playback Controls ─────────────────────────────────────────────
@@ -1171,6 +1205,9 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   Future<void> addPlayNextTrack(Track track) async =>
       _queueManager.addPlayNext(track);
+
+  Future<void> insertQueueTrack(int index, Track track) async =>
+      _queueManager.insertTrack(index, track);
 
   @override
   Future<void> insertQueueItem(int index, MediaItem mi) async =>

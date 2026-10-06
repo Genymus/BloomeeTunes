@@ -11,6 +11,7 @@ import 'package:Bloomee/services/db/dao/settings_dao.dart';
 import 'package:Bloomee/services/db/dao/track_dao.dart';
 import 'package:Bloomee/services/db/db_provider.dart';
 import 'package:Bloomee/services/plugin/plugin_service.dart';
+import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:Bloomee/services/player/stream_quality_selector.dart';
 import 'package:Bloomee/src/rust/api/plugin/commands.dart';
 
@@ -57,9 +58,27 @@ class MediaResolverService {
 
   /// Resolve [track] into a playable URI.
   Future<ResolvedMediaSource> resolve(Track track) async {
+    final sourceMediaId = TrackTrimService.resolveSourceMediaId(track.id);
+    final sourceTrack = sourceMediaId == track.id
+        ? track
+        : Track(
+            id: sourceMediaId,
+            title: track.title,
+            artists: track.artists,
+            album: track.album,
+            durationMs: track.durationMs,
+            thumbnail: track.thumbnail,
+            url: track.url,
+            isExplicit: track.isExplicit,
+            lyrics: track.lyrics,
+          );
+
     // 1. Check for an offline/downloaded version.
     try {
-      final down = await _downloadDao.getDownloadRecord(track.id);
+      var down = await _downloadDao.getDownloadRecord(track.id);
+      down ??= sourceTrack.id == track.id
+          ? null
+          : await _downloadDao.getDownloadRecord(sourceTrack.id);
       if (down != null) {
         log('Playing Offline: ${track.title}', name: 'MediaResolverService');
         return ResolvedMediaSource(
@@ -73,14 +92,14 @@ class MediaResolverService {
     }
 
     // 2. Plugin-based stream resolution.
-    final parts = tryParseMediaId(track.id);
+    final parts = tryParseMediaId(sourceTrack.id);
     if (parts == null) {
       GlobalEventBus.instance.emitError(
-        AppError.malformedMediaId(rawId: track.id),
+        AppError.malformedMediaId(rawId: sourceTrack.id),
       );
       throw Exception(
         'Cannot resolve stream for "${track.title}" — '
-        'malformed media ID: "${track.id}"',
+        'malformed media ID: "${sourceTrack.id}"',
       );
     }
 
@@ -107,7 +126,10 @@ class MediaResolverService {
     } on PluginException catch (e) {
       if (e is PluginNotLoadedException) {
         GlobalEventBus.instance.emitError(
-          AppError.pluginNotLoaded(pluginId: parts.pluginId, mediaId: track.id),
+          AppError.pluginNotLoaded(
+            pluginId: parts.pluginId,
+            mediaId: sourceTrack.id,
+          ),
         );
       } else {
         GlobalEventBus.instance.emitError(

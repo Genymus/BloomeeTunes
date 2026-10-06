@@ -2538,6 +2538,18 @@ abstract class AppLocalizations {
   /// **'New duration'**
   String get trackTrimNewDuration;
 
+  /// No description provided for @trackTrimTitleFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Track name'**
+  String get trackTrimTitleFieldLabel;
+
+  /// No description provided for @trackTrimTitleFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a track name'**
+  String get trackTrimTitleFieldHint;
+
   /// No description provided for @trackTrimStartLabel.
   ///
   /// In en, this message translates to:
@@ -2556,6 +2568,12 @@ abstract class AppLocalizations {
   /// **'hh:mm:ss, mm:ss, or seconds'**
   String get trackTrimInputHint;
 
+  /// No description provided for @trackTrimDuplicateTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate track and keep original'**
+  String get trackTrimDuplicateTrack;
+
   /// No description provided for @trackTrimCancel.
   ///
   /// In en, this message translates to:
@@ -2567,6 +2585,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get trackTrimOk;
+
+  /// No description provided for @trackTrimErrorInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid track name.'**
+  String get trackTrimErrorInvalidTitle;
 
   /// No description provided for @trackTrimErrorInvalidFormat.
   ///

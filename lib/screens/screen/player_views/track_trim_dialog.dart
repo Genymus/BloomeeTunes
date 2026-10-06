@@ -5,12 +5,22 @@ import 'package:Bloomee/services/player/track_trim_service.dart';
 import 'package:Bloomee/utils/load_image.dart';
 import 'package:flutter/material.dart';
 
-Future<TrackTrimConfig?> showTrackTrimDialog(
+class TrackTrimDialogResult {
+  final TrackTrimConfig config;
+  final bool duplicateTrack;
+
+  const TrackTrimDialogResult({
+    required this.config,
+    required this.duplicateTrack,
+  });
+}
+
+Future<TrackTrimDialogResult?> showTrackTrimDialog(
   BuildContext context, {
   required Track track,
   TrackTrimService? service,
 }) {
-  return showDialog<TrackTrimConfig>(
+  return showDialog<TrackTrimDialogResult>(
     context: context,
     builder: (_) => _TrackTrimDialog(
       track: track,
@@ -33,17 +43,21 @@ class _TrackTrimDialog extends StatefulWidget {
 }
 
 class _TrackTrimDialogState extends State<_TrackTrimDialog> {
+  late final TextEditingController _titleController;
   late final TextEditingController _startController;
   late final TextEditingController _endController;
 
   Duration _originalDuration = Duration.zero;
   Duration? _newDuration;
   String? _errorMessage;
+  TrackTrimConfig? _loadedConfig;
+  bool _duplicateTrack = false;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController();
     _startController = TextEditingController();
     _endController = TextEditingController();
     _startController.addListener(_recomputeDuration);
@@ -61,6 +75,8 @@ class _TrackTrimDialogState extends State<_TrackTrimDialog> {
         : (fallbackMs > 0 ? fallbackMs : 0);
 
     _originalDuration = Duration(milliseconds: originalMs);
+    _loadedConfig = config;
+    _titleController.text = config.effectiveTitle(widget.track.title);
     _startController.text = _formatClock(Duration(milliseconds: config.startMs));
     _endController.text = _formatClock(Duration(milliseconds: config.endMs));
     _recomputeDuration();
@@ -137,8 +153,14 @@ class _TrackTrimDialogState extends State<_TrackTrimDialog> {
 
   Future<void> _onConfirm() async {
     final l10n = AppLocalizations.of(context)!;
+    final trimmedTitle = _titleController.text.trim();
     final start = _parseDurationInput(_startController.text);
     final end = _parseDurationInput(_endController.text);
+
+    if (trimmedTitle.isEmpty) {
+      setState(() => _errorMessage = l10n.trackTrimErrorInvalidTitle);
+      return;
+    }
 
     if (start == null || end == null) {
       setState(() => _errorMessage = l10n.trackTrimErrorInvalidFormat);
@@ -156,6 +178,15 @@ class _TrackTrimDialogState extends State<_TrackTrimDialog> {
     }
 
     final isDefault = start == Duration.zero && end == _originalDuration;
+    final loaded = _loadedConfig;
+    final hasExistingCustomTitle = loaded?.hasCustomTitle ?? false;
+    final existingCustomTitle = loaded?.renamedTitle?.trim();
+    final renamedTitle = hasExistingCustomTitle && existingCustomTitle != null
+        ? (trimmedTitle == existingCustomTitle
+            ? existingCustomTitle
+            : (trimmedTitle == widget.track.title ? null : trimmedTitle))
+        : (trimmedTitle == widget.track.title ? null : trimmedTitle);
+
     if (!isDefault && end <= start) {
       setState(() => _errorMessage = l10n.trackTrimErrorEndBeforeStart);
       return;
@@ -166,14 +197,22 @@ class _TrackTrimDialogState extends State<_TrackTrimDialog> {
       startMs: isDefault ? 0 : start.inMilliseconds,
       endMs: isDefault ? _originalDuration.inMilliseconds : end.inMilliseconds,
       originalDurationMs: _originalDuration.inMilliseconds,
+      sourceMediaId: TrackTrimService.resolveSourceMediaId(widget.track.id),
+      renamedTitle: renamedTitle,
     );
 
     if (!mounted) return;
-    Navigator.of(context).pop(config);
+    Navigator.of(context).pop(
+      TrackTrimDialogResult(
+        config: config,
+        duplicateTrack: _duplicateTrack,
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _titleController.dispose();
     _startController.dispose();
     _endController.dispose();
     super.dispose();
@@ -268,6 +307,16 @@ class _TrackTrimDialogState extends State<_TrackTrimDialog> {
                     ),
                     const SizedBox(height: 14),
                     TextField(
+                      controller: _titleController,
+                      keyboardType: TextInputType.text,
+                      style: const TextStyle(color: Default_Theme.primaryColor1),
+                      decoration: InputDecoration(
+                        labelText: l10n.trackTrimTitleFieldLabel,
+                        hintText: l10n.trackTrimTitleFieldHint,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
                       controller: _startController,
                       keyboardType: TextInputType.datetime,
                       style: const TextStyle(color: Default_Theme.primaryColor1),
@@ -285,6 +334,24 @@ class _TrackTrimDialogState extends State<_TrackTrimDialog> {
                         labelText: l10n.trackTrimEndLabel,
                         hintText: l10n.trackTrimInputHint,
                       ),
+                    ),
+                    const SizedBox(height: 2),
+                    CheckboxListTile(
+                      value: _duplicateTrack,
+                      activeColor: Default_Theme.accentColor2,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        l10n.trackTrimDuplicateTrack,
+                        style: Default_Theme.secondoryTextStyle.merge(
+                          const TextStyle(
+                            color: Default_Theme.primaryColor1,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      onChanged: (value) =>
+                          setState(() => _duplicateTrack = value ?? false),
                     ),
                     const SizedBox(height: 12),
                     Text(
