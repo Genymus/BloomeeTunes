@@ -891,6 +891,38 @@ class AppLocalizationsEn extends AppLocalizations {
       '10-band parametric EQ via FFmpeg.';
 
   @override
+  String get playerSettingNotificationControlsHeader => 'Notification Controls';
+
+  @override
+  String get playerSettingNotificationControlsSubtitle =>
+      'Choose which controls are shown in Android notifications and lock screen, then drag to reorder from left to right.';
+
+  @override
+  String get playerSettingNotificationControlPlayPause => 'Play / Pause';
+
+  @override
+  String get playerSettingNotificationControlPrevious => 'Previous media';
+
+  @override
+  String get playerSettingNotificationControlNext => 'Next media';
+
+  @override
+  String get playerSettingNotificationControlAddToLiked => 'Add to Liked';
+
+  @override
+  String get playerSettingNotificationControlAddToPlaylist => 'Add to playlist';
+
+  @override
+  String get playerSettingNotificationControlRepeat => 'Repeat';
+
+  @override
+  String get playerSettingNotificationControlShuffle => 'Shuffle';
+
+  @override
+  String get playerSettingNotificationControlRestartFromBeginning =>
+      'Restart from beginning';
+
+  @override
   String get pluginDefaultsTitle => 'Plugin Defaults';
 
   @override

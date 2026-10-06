@@ -61,6 +61,9 @@ class SettingKeys {
   /// JSON-encoded last queue state for session resume.
   static const String lastQueueState = 'lastQueueState';
 
+  /// JSON-encoded notification-player controls order and enabled state.
+  static const String notificationPlayerControls = 'notificationPlayerControls';
+
   // ── Location / charts ───────────────────────────────────────────────────────
   static const String languageCode = "languageCode";
   static const String autoGetCountry = "autoGetCountry";

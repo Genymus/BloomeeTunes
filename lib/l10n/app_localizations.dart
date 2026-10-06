@@ -1674,6 +1674,66 @@ abstract class AppLocalizations {
   /// **'10-band parametric EQ via FFmpeg.'**
   String get playerSettingEqualizerSubtitle;
 
+  /// No description provided for @playerSettingNotificationControlsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Controls'**
+  String get playerSettingNotificationControlsHeader;
+
+  /// No description provided for @playerSettingNotificationControlsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which controls are shown in Android notifications and lock screen, then drag to reorder from left to right.'**
+  String get playerSettingNotificationControlsSubtitle;
+
+  /// No description provided for @playerSettingNotificationControlPlayPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Play / Pause'**
+  String get playerSettingNotificationControlPlayPause;
+
+  /// No description provided for @playerSettingNotificationControlPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous media'**
+  String get playerSettingNotificationControlPrevious;
+
+  /// No description provided for @playerSettingNotificationControlNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next media'**
+  String get playerSettingNotificationControlNext;
+
+  /// No description provided for @playerSettingNotificationControlAddToLiked.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Liked'**
+  String get playerSettingNotificationControlAddToLiked;
+
+  /// No description provided for @playerSettingNotificationControlAddToPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to playlist'**
+  String get playerSettingNotificationControlAddToPlaylist;
+
+  /// No description provided for @playerSettingNotificationControlRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get playerSettingNotificationControlRepeat;
+
+  /// No description provided for @playerSettingNotificationControlShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle'**
+  String get playerSettingNotificationControlShuffle;
+
+  /// No description provided for @playerSettingNotificationControlRestartFromBeginning.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart from beginning'**
+  String get playerSettingNotificationControlRestartFromBeginning;
+
   /// No description provided for @pluginDefaultsTitle.
   ///
   /// In en, this message translates to:

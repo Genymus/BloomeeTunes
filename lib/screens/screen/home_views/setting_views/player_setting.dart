@@ -4,6 +4,7 @@ import 'package:Bloomee/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_views/setting_shared_widgets.dart';
 import 'package:Bloomee/screens/screen/player_views/equalizer_view.dart';
+import 'package:Bloomee/services/player/notification_player_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Bloomee/l10n/app_localizations.dart';
@@ -134,6 +135,16 @@ class PlayerSettings extends StatelessWidget {
                 ],
               ),
 
+              const SizedBox(height: 28),
+
+              SettingSectionHeader(
+                  label: l10n.playerSettingNotificationControlsHeader),
+              SettingCard(
+                children: const [
+                  _NotificationControlsCard(),
+                ],
+              ),
+
               const SizedBox(height: 40),
             ],
           );
@@ -169,6 +180,180 @@ class _CrossfadeSliderState extends State<_CrossfadeSlider> {
     super.didUpdateWidget(old);
     if (old.value != widget.value) {
       _localValue = widget.value.toDouble();
+    }
+  }
+
+  class _NotificationControlsCard extends StatefulWidget {
+    const _NotificationControlsCard();
+
+    @override
+    State<_NotificationControlsCard> createState() =>
+        _NotificationControlsCardState();
+  }
+
+  class _NotificationControlsCardState extends State<_NotificationControlsCard> {
+    bool _loading = true;
+    List<NotificationPlayerControlPreference> _items = const [];
+
+    @override
+    void initState() {
+      super.initState();
+      _load();
+    }
+
+    Future<void> _load() async {
+      final player = context.read<BloomeePlayerCubit>().bloomeePlayer;
+      final loaded = await player.loadNotificationPlayerControls();
+      if (!mounted) return;
+      setState(() {
+        _items = List<NotificationPlayerControlPreference>.from(loaded);
+        _loading = false;
+      });
+    }
+
+    Future<void> _persist() async {
+      final player = context.read<BloomeePlayerCubit>().bloomeePlayer;
+      await player.updateNotificationPlayerControls(_items);
+    }
+
+    IconData _iconForAction(NotificationPlayerControlAction action) {
+      return switch (action) {
+        NotificationPlayerControlAction.playPause => MingCute.play_fill,
+        NotificationPlayerControlAction.previous => Icons.skip_previous_rounded,
+        NotificationPlayerControlAction.next => Icons.skip_next_rounded,
+        NotificationPlayerControlAction.addToLiked => MingCute.heart_fill,
+        NotificationPlayerControlAction.addToPlaylist => MingCute.playlist_add_line,
+        NotificationPlayerControlAction.repeat => Icons.repeat_rounded,
+        NotificationPlayerControlAction.shuffle => Icons.shuffle_rounded,
+        NotificationPlayerControlAction.restartFromBeginning =>
+          Icons.replay_rounded,
+      };
+    }
+
+    String _labelForAction(
+      BuildContext context,
+      NotificationPlayerControlAction action,
+    ) {
+      final l10n = AppLocalizations.of(context)!;
+      return switch (action) {
+        NotificationPlayerControlAction.playPause =>
+          l10n.playerSettingNotificationControlPlayPause,
+        NotificationPlayerControlAction.previous =>
+          l10n.playerSettingNotificationControlPrevious,
+        NotificationPlayerControlAction.next =>
+          l10n.playerSettingNotificationControlNext,
+        NotificationPlayerControlAction.addToLiked =>
+          l10n.playerSettingNotificationControlAddToLiked,
+        NotificationPlayerControlAction.addToPlaylist =>
+          l10n.playerSettingNotificationControlAddToPlaylist,
+        NotificationPlayerControlAction.repeat =>
+          l10n.playerSettingNotificationControlRepeat,
+        NotificationPlayerControlAction.shuffle =>
+          l10n.playerSettingNotificationControlShuffle,
+        NotificationPlayerControlAction.restartFromBeginning =>
+          l10n.playerSettingNotificationControlRestartFromBeginning,
+      };
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      final l10n = AppLocalizations.of(context)!;
+      if (_loading) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: CircularProgressIndicator(color: Default_Theme.accentColor2),
+          ),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                l10n.playerSettingNotificationControlsSubtitle,
+                style: Default_Theme.secondoryTextStyle.copyWith(
+                  color: Default_Theme.primaryColor2.withValues(alpha: 0.55),
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              buildDefaultDragHandles: false,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _items.length,
+              onReorder: (oldIndex, newIndex) async {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex--;
+                  final item = _items.removeAt(oldIndex);
+                  _items.insert(newIndex, item);
+                });
+                await _persist();
+              },
+              itemBuilder: (context, index) {
+                final item = _items[index];
+                return Container(
+                  key: ValueKey(item.action.name),
+                  margin: EdgeInsets.only(bottom: index == _items.length - 1 ? 0 : 8),
+                  decoration: BoxDecoration(
+                    color: Default_Theme.primaryColor2.withValues(alpha: 0.03),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Default_Theme.primaryColor2.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: item.enabled,
+                        activeColor: Default_Theme.accentColor2,
+                        onChanged: (value) async {
+                          final enabled = value ?? false;
+                          setState(() {
+                            _items[index] = item.copyWith(enabled: enabled);
+                          });
+                          await _persist();
+                        },
+                      ),
+                      Icon(
+                        _iconForAction(item.action),
+                        color: Default_Theme.primaryColor2.withValues(alpha: 0.8),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _labelForAction(context, item.action),
+                          style: Default_Theme.secondoryTextStyleMedium.copyWith(
+                            color: Default_Theme.primaryColor2,
+                            fontSize: 14.5,
+                          ),
+                        ),
+                      ),
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Icon(
+                            Icons.drag_handle_rounded,
+                            color: Default_Theme.accentColor2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
     }
   }
 

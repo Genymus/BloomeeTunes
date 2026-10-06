@@ -10,12 +10,16 @@ import 'package:Bloomee/core/constants/setting_keys.dart';
 import 'package:Bloomee/core/di/service_locator.dart';
 import 'package:Bloomee/plugins/utils/media_id.dart';
 import 'package:Bloomee/plugins/errors/plugin_exceptions.dart';
+import 'package:Bloomee/routes/app_router.dart';
+import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/screens/widgets/snackbar.dart';
 import 'package:Bloomee/services/db/db_provider.dart';
 import 'package:Bloomee/services/db/dao/playlist_dao.dart';
 import 'package:Bloomee/services/db/dao/settings_dao.dart';
 import 'package:Bloomee/services/db/dao/track_dao.dart';
+import 'package:Bloomee/services/db/global_db.dart';
 import 'package:Bloomee/services/player/media_resolver_service.dart';
+import 'package:Bloomee/services/player/notification_player_controls.dart';
 import 'package:Bloomee/services/player/player_engine.dart';
 import 'package:Bloomee/services/player/player_error_handler.dart';
 import 'package:Bloomee/services/player/queue_manager.dart';
@@ -28,6 +32,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:async/async.dart';
 import 'package:easy_debounce/easy_throttle.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// BloomeeTunes main audio player.
@@ -55,12 +60,11 @@ import 'package:rxdart/rxdart.dart';
 class BloomeeMusicPlayer extends BaseAudioHandler
     with SeekHandler, QueueHandler {
   static const String _likeTrackActionName = 'like_current_track';
-  static const MediaControl _likeTrackControl = MediaControl(
-    androidIcon: 'drawable/ic_notification_like',
-    label: 'Like',
-    action: MediaAction.custom,
-    customAction: CustomMediaAction(name: _likeTrackActionName),
-  );
+  static const String _addToPlaylistActionName = 'add_current_track_to_playlist';
+  static const String _cycleRepeatActionName = 'cycle_repeat_mode';
+  static const String _toggleShuffleActionName = 'toggle_shuffle_mode';
+  static const String _restartFromBeginningActionName =
+      'restart_from_beginning';
 
   late PlayerEngine engine;
 
@@ -111,6 +115,8 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   // ── M-12 ──────────────────────────────────────────────────────────────────
   Duration _savedPositionForRevive = Duration.zero;
+  List<NotificationPlayerControlPreference> _notificationControls =
+      NotificationPlayerControlsConfig.defaultPreferences();
 
   // ── Modular component accessors ───────────────────────────────────────────
   BehaviorSubject<bool> get shuffleMode => _queueManager.shuffleMode;
@@ -134,6 +140,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     _initModules();
     _initSubscriptions();
     _setupInterruptionListeners();
+    _loadNotificationControls();
     // Engine settings (EQ, crossfade) restore happens async — acceptable
     // because the first play() will work with defaults until restore completes.
     _restoreEngineSettings();
@@ -422,14 +429,12 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       EngineState.completed => AudioProcessingState.completed,
       EngineState.error => AudioProcessingState.error,
     };
+    final controls = _buildNotificationControls(playing);
+    final compactCount = controls.length < 3 ? controls.length : 3;
+    final compactIndices = List<int>.generate(compactCount, (index) => index);
 
     playbackState.add(PlaybackState(
-      controls: [
-        MediaControl.skipToPrevious,
-        playing ? MediaControl.pause : MediaControl.play,
-        MediaControl.skipToNext,
-        _likeTrackControl,
-      ],
+      controls: controls,
       processingState: processingState,
       systemActions: const {
         MediaAction.skipToPrevious,
@@ -437,7 +442,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
         MediaAction.skipToNext,
         MediaAction.seek,
       },
-      androidCompactActionIndices: const [0, 1, 2],
+      androidCompactActionIndices: compactIndices,
       updatePosition: position,
       updateTime: DateTime.now(),
       playing: playing,
@@ -449,6 +454,85 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       DiscordService.updatePresence(
           track: currentTrackInfo, isPlaying: playing);
     });
+  }
+
+  List<MediaControl> _buildNotificationControls(bool playing) {
+    final activeControls = _notificationControls.where((e) => e.enabled);
+    final controls = <MediaControl>[];
+    for (final preference in activeControls) {
+      switch (preference.action) {
+        case NotificationPlayerControlAction.playPause:
+          controls.add(playing ? MediaControl.pause : MediaControl.play);
+          break;
+        case NotificationPlayerControlAction.previous:
+          controls.add(MediaControl.skipToPrevious);
+          break;
+        case NotificationPlayerControlAction.next:
+          controls.add(MediaControl.skipToNext);
+          break;
+        case NotificationPlayerControlAction.addToLiked:
+          controls.add(_customControl(
+            androidIcon: 'drawable/ic_notification_like',
+            label: 'Add to liked',
+            actionName: _likeTrackActionName,
+          ));
+          break;
+        case NotificationPlayerControlAction.addToPlaylist:
+          controls.add(_customControl(
+            androidIcon: 'drawable/ic_notification_add_to_playlist',
+            label: 'Add to playlist',
+            actionName: _addToPlaylistActionName,
+          ));
+          break;
+        case NotificationPlayerControlAction.repeat:
+          controls.add(_customControl(
+            androidIcon: 'drawable/ic_notification_repeat',
+            label: _repeatControlLabel(),
+            actionName: _cycleRepeatActionName,
+          ));
+          break;
+        case NotificationPlayerControlAction.shuffle:
+          controls.add(_customControl(
+            androidIcon: 'drawable/ic_notification_shuffle',
+            label: _queueManager.shuffleMode.value ? 'Shuffle on' : 'Shuffle off',
+            actionName: _toggleShuffleActionName,
+          ));
+          break;
+        case NotificationPlayerControlAction.restartFromBeginning:
+          controls.add(_customControl(
+            androidIcon: 'drawable/ic_notification_restart',
+            label: 'Restart from beginning',
+            actionName: _restartFromBeginningActionName,
+          ));
+          break;
+      }
+    }
+    if (controls.isNotEmpty) return controls;
+    return [playing ? MediaControl.pause : MediaControl.play];
+  }
+
+  MediaControl _customControl({
+    required String androidIcon,
+    required String label,
+    required String actionName,
+  }) {
+    return MediaControl(
+      androidIcon: androidIcon,
+      label: label,
+      action: MediaAction.custom,
+      customAction: CustomMediaAction(name: actionName),
+    );
+  }
+
+  String _repeatControlLabel() {
+    switch (loopMode.value) {
+      case LoopMode.off:
+        return 'Repeat off';
+      case LoopMode.all:
+        return 'Repeat all';
+      case LoopMode.one:
+        return 'Repeat one';
+    }
   }
 
   // ─── Track Identity ───────────────────────────────────────────────────────
@@ -501,10 +585,52 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   @override
   Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) async {
     if (_isDisposed) return null;
-    if (name == _likeTrackActionName) {
-      await _addCurrentTrackToLiked();
+    switch (name) {
+      case _likeTrackActionName:
+        await _addCurrentTrackToLiked();
+        break;
+      case _addToPlaylistActionName:
+        await _openAddToPlaylistPicker();
+        break;
+      case _cycleRepeatActionName:
+        _cycleRepeatMode();
+        break;
+      case _toggleShuffleActionName:
+        await _toggleShuffleMode();
+        break;
+      case _restartFromBeginningActionName:
+        await rewind();
+        break;
     }
     return null;
+  }
+
+  Future<void> updateNotificationPlayerControls(
+    List<NotificationPlayerControlPreference> preferences,
+  ) async {
+    _notificationControls = NotificationPlayerControlsConfig.decode(
+      jsonEncode(preferences.map((e) => e.toJson()).toList()),
+    );
+    final settingsDao = SettingsDAO(DBProvider.db);
+    await NotificationPlayerControlsConfig.save(settingsDao, _notificationControls);
+    syncPublicState();
+  }
+
+  Future<List<NotificationPlayerControlPreference>> loadNotificationPlayerControls()
+      async {
+    final settingsDao = SettingsDAO(DBProvider.db);
+    return NotificationPlayerControlsConfig.load(settingsDao);
+  }
+
+  Future<void> _loadNotificationControls() async {
+    try {
+      _notificationControls =
+          await NotificationPlayerControlsConfig.load(SettingsDAO(DBProvider.db));
+      if (!_isDisposed) syncPublicState();
+    } catch (e) {
+      log('Failed to load notification controls: $e',
+          name: 'BloomeeMusicPlayer');
+    }
   }
 
   Future<void> _addCurrentTrackToLiked() async {
@@ -514,6 +640,136 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     final isAlreadyLiked = await playlistDao.isTrackLiked(track.id);
     if (isAlreadyLiked) return;
     await playlistDao.setTrackLiked(track, true);
+  }
+
+  Future<void> _openAddToPlaylistPicker() async {
+    final track = currentMedia;
+    if (isTrackNull(track)) return;
+    final context = GlobalRoutes.globalRouterKey.currentContext;
+    if (context == null) return;
+
+    final playlistDao = PlaylistDAO(DBProvider.db, TrackDAO(DBProvider.db));
+    final playlists = (await playlistDao.getPlaylistsByType(PlaylistTypeDB.userPlaylist))
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    if (playlists.isEmpty) {
+      SnackbarService.showMessage('No user playlists available.');
+      return;
+    }
+
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final selected = ValueNotifier<Set<int>>({});
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.75,
+              ),
+              decoration: const BoxDecoration(
+                color: Default_Theme.themeColor,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Add "${track.title}" to playlists',
+                    style: Default_Theme.secondoryTextStyleMedium.copyWith(
+                      color: Default_Theme.primaryColor1,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: ValueListenableBuilder<Set<int>>(
+                      valueListenable: selected,
+                      builder: (context, selectedIds, _) {
+                        return ListView.builder(
+                          itemCount: playlists.length,
+                          itemBuilder: (context, index) {
+                            final playlist = playlists[index];
+                            final checked = selectedIds.contains(playlist.id);
+                            return CheckboxListTile(
+                              value: checked,
+                              title: Text(
+                                playlist.name,
+                                style:
+                                    Default_Theme.secondoryTextStyle.copyWith(
+                                  color: Default_Theme.primaryColor1,
+                                ),
+                              ),
+                              activeColor: Default_Theme.accentColor2,
+                              checkColor: Default_Theme.themeColor,
+                              onChanged: (v) {
+                                final next = Set<int>.from(selectedIds);
+                                if (v == true) {
+                                  next.add(playlist.id);
+                                } else {
+                                  next.remove(playlist.id);
+                                }
+                                selected.value = next;
+                                setModalState(() {});
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: () async {
+                          final selectedIds = selected.value;
+                          if (selectedIds.isEmpty) {
+                            Navigator.of(sheetContext).pop();
+                            return;
+                          }
+                          for (final playlistId in selectedIds) {
+                            await playlistDao.addTrackToPlaylist(playlistId, track);
+                          }
+                          Navigator.of(sheetContext).pop();
+                          SnackbarService.showMessage(
+                              'Added to ${selectedIds.length} playlist(s).');
+                        },
+                        child: const Text('Add'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _cycleRepeatMode() {
+    final next = switch (loopMode.value) {
+      LoopMode.off => LoopMode.all,
+      LoopMode.all => LoopMode.one,
+      LoopMode.one => LoopMode.off,
+    };
+    setLoopMode(next);
+  }
+
+  Future<void> _toggleShuffleMode() async {
+    await shuffle(!_queueManager.shuffleMode.value);
   }
 
   Future<void> seekNSecForward(Duration n) async {
@@ -561,6 +817,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
   void setLoopMode(LoopMode mode) {
     loopMode.add(mode);
     engine.setLoopMode(mode);
+    syncPublicState();
   }
 
   void setCrossfadeDuration(Duration duration) {
@@ -569,6 +826,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
 
   Future<void> shuffle(bool enabled) async {
     _queueManager.shuffle(enabled);
+    syncPublicState();
   }
 
   // ─── Core Play Dispatch ────────────────────────────────────────────────────
