@@ -194,14 +194,12 @@ class TrackTrimService {
   String buildVariantMediaId(String sourceMediaId) {
     final canonicalSource = resolveSourceMediaId(sourceMediaId);
     final parts = tryParseMediaId(canonicalSource);
+    final token =
+        '${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 32)}';
     if (parts == null) {
-      final token =
-          '${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 32)}';
       return '$canonicalSource$_variantMarker$token';
     }
 
-    final token =
-        '${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 32)}';
     return buildMediaId(parts.pluginId, '${parts.localId}$_variantMarker$token');
   }
 
