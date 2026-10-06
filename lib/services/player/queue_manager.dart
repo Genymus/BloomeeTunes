@@ -227,11 +227,11 @@ class QueueManager {
   }
 
   /// Toggle shuffle mode.
-  void shuffle(bool enabled) {
+  Future<void> shuffle(bool enabled) async {
     print('[SHUFFLE][QueueManager] shuffle(enabled=$enabled) '
         'queueLength=${_queue.value.length} currentIndex=$_currentIndex');
     shuffleMode.add(enabled);
-    _persistShuffleMode(enabled);
+    await _persistShuffleMode(enabled);
     if (enabled && _queue.value.isNotEmpty) {
       _shuffleList = generateRandomIndices(_queue.value.length);
       // Put current track at shuffle index 0.

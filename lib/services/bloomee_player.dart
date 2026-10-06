@@ -548,7 +548,7 @@ class BloomeeMusicPlayer extends BaseAudioHandler
       _queueManager.trimToPlaylistSize();
       _relatedSongsManager.clearRelatedSongs();
     }
-    _queueManager.shuffle(enabled);
+    await _queueManager.shuffle(enabled);
   }
 
   // ─── Core Play Dispatch ────────────────────────────────────────────────────
