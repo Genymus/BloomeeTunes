@@ -297,7 +297,9 @@ class CoverImageVolSlider extends StatelessWidget {
                             bloomeePlayerCubit.bloomeePlayer.currentTrackTrim,
                         builder: (context, trimSnapshot) {
                           final l10n = AppLocalizations.of(context)!;
-                          final trimEnabled = trimSnapshot.data?.enabled ?? false;
+                          final trimConfig = trimSnapshot.data;
+                          final trimEnabled = (trimConfig?.enabled ?? false) ||
+                              (trimConfig?.hasCustomTitle ?? false);
                           return Tooltip(
                             message: l10n.trackTrimOpenEditor,
                             child: Material(

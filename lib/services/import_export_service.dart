@@ -273,9 +273,11 @@ class ImportExportService {
           final track = _trackFromMap(item);
           tracks.add(track);
           final trimJson = item['trimConfig'];
-          if (trimJson is Map<String, dynamic>) {
+          if (trimJson is Map) {
+            final trimMap =
+                trimJson.map((key, value) => MapEntry('$key', value));
             trimByTrackId[track.id] = TrackTrimConfig.fromJson(
-              trimJson,
+              trimMap,
               fallbackOriginalDurationMs: track.durationMs?.toInt() ?? 0,
               fallbackSourceMediaId:
                   TrackTrimService.resolveSourceMediaId(track.id),
@@ -286,15 +288,6 @@ class ImportExportService {
 
       await _playlistDao.addTracksToPlaylist(playlistId, tracks);
       for (final entry in trimByTrackId.entries) {
-        final track = tracks.firstWhere(
-          (t) => t.id == entry.key,
-          orElse: () => Track(
-            id: entry.key,
-            title: '',
-            artists: const [],
-            thumbnail: Artwork(url: '', layout: ImageLayout.square),
-          ),
-        );
         final normalized = trimService.normalizeConfig(
           entry.key,
           entry.value,
@@ -322,12 +315,13 @@ class ImportExportService {
       final playlistId = await _playlistDao.ensurePlaylist("Imported");
       await _playlistDao.addTracksToPlaylist(playlistId, [track]);
       final trimJson = trackMap['trimConfig'];
-      if (trimJson is Map<String, dynamic>) {
+      if (trimJson is Map) {
+        final trimMap = trimJson.map((key, value) => MapEntry('$key', value));
         final trimService = TrackTrimService();
         final normalized = trimService.normalizeConfig(
           track.id,
           TrackTrimConfig.fromJson(
-            trimJson,
+            trimMap,
             fallbackOriginalDurationMs: track.durationMs?.toInt() ?? 0,
             fallbackSourceMediaId:
                 TrackTrimService.resolveSourceMediaId(track.id),

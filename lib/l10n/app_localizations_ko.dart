@@ -1299,10 +1299,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get trackTrimNewDuration => 'New duration';
 
   @override
-  String get trackTrimTitleFieldLabel => 'Track name';
+  String get trackTrimTitleFieldLabel => '트랙 이름';
 
   @override
-  String get trackTrimTitleFieldHint => 'Enter a track name';
+  String get trackTrimTitleFieldHint => '트랙 이름을 입력하세요';
 
   @override
   String get trackTrimStartLabel => 'Start';
@@ -1314,7 +1314,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get trackTrimInputHint => 'hh:mm:ss, mm:ss, or seconds';
 
   @override
-  String get trackTrimDuplicateTrack => 'Duplicate track and keep original';
+  String get trackTrimDuplicateTrack => '트랙을 복제하고 원본 유지';
 
   @override
   String get trackTrimCancel => 'Cancel';
@@ -1323,7 +1323,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get trackTrimOk => 'OK';
 
   @override
-  String get trackTrimErrorInvalidTitle => 'Enter a valid track name.';
+  String get trackTrimErrorInvalidTitle => '유효한 트랙 이름을 입력하세요.';
 
   @override
   String get trackTrimErrorInvalidFormat => 'Enter a valid time format.';

@@ -1293,10 +1293,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trackTrimNewDuration => 'New duration';
 
   @override
-  String get trackTrimTitleFieldLabel => 'Track name';
+  String get trackTrimTitleFieldLabel => '歌曲名称';
 
   @override
-  String get trackTrimTitleFieldHint => 'Enter a track name';
+  String get trackTrimTitleFieldHint => '请输入歌曲名称';
 
   @override
   String get trackTrimStartLabel => 'Start';
@@ -1308,7 +1308,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trackTrimInputHint => 'hh:mm:ss, mm:ss, or seconds';
 
   @override
-  String get trackTrimDuplicateTrack => 'Duplicate track and keep original';
+  String get trackTrimDuplicateTrack => '复制歌曲并保留原始版本';
 
   @override
   String get trackTrimCancel => 'Cancel';
@@ -1317,7 +1317,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trackTrimOk => 'OK';
 
   @override
-  String get trackTrimErrorInvalidTitle => 'Enter a valid track name.';
+  String get trackTrimErrorInvalidTitle => '请输入有效的歌曲名称。';
 
   @override
   String get trackTrimErrorInvalidFormat => 'Enter a valid time format.';

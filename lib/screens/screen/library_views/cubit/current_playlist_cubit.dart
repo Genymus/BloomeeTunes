@@ -271,7 +271,17 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
     if (_playlist == null || _playlistId == null) return;
     final loaded = await ensureAllTracksLoaded();
     final updatedTracks = <Track>[track, ...loaded.tracks];
-    await updatePlaylist(updatedTracks);
+    _playlist = _playlist!.copyWith(tracks: updatedTracks);
+    _loadedCount = updatedTracks.length;
+    emit(
+      state.copyWith(
+        playlist: _playlist,
+        totalTracks: updatedTracks.length,
+        hasMore: false,
+        status: CurrentPlaylistLoadStatus.success,
+      ),
+    );
+    await _playlistDao.setPlaylistTracks(_playlistId!, updatedTracks);
   }
 
   /// Returns the name of the currently loaded playlist, or null if none.

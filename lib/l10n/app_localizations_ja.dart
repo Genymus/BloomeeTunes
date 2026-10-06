@@ -1297,10 +1297,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackTrimNewDuration => 'New duration';
 
   @override
-  String get trackTrimTitleFieldLabel => 'Track name';
+  String get trackTrimTitleFieldLabel => '曲名';
 
   @override
-  String get trackTrimTitleFieldHint => 'Enter a track name';
+  String get trackTrimTitleFieldHint => '曲名を入力してください';
 
   @override
   String get trackTrimStartLabel => 'Start';
@@ -1312,7 +1312,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackTrimInputHint => 'hh:mm:ss, mm:ss, or seconds';
 
   @override
-  String get trackTrimDuplicateTrack => 'Duplicate track and keep original';
+  String get trackTrimDuplicateTrack => '曲を複製してオリジナルを保持';
 
   @override
   String get trackTrimCancel => 'Cancel';
@@ -1321,7 +1321,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackTrimOk => 'OK';
 
   @override
-  String get trackTrimErrorInvalidTitle => 'Enter a valid track name.';
+  String get trackTrimErrorInvalidTitle => '有効な曲名を入力してください。';
 
   @override
   String get trackTrimErrorInvalidFormat => 'Enter a valid time format.';

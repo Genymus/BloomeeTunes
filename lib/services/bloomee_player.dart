@@ -567,8 +567,9 @@ class BloomeeMusicPlayer extends BaseAudioHandler
         }
       }
 
-      return effectiveTrack;
     }
+
+    return effectiveTrack;
   }
 
   Future<(Track, TrackTrimConfig)> createTrimmedDuplicateTrack(
