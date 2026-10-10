@@ -175,11 +175,11 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
     _isRefreshingFromWatcher = true;
     _pendingWatcherRefresh = false;
     try {
-    final totalTracks = await _playlistDao.getPlaylistTrackCount(playlistId);
-    final previouslyLoaded = state.playlist.tracks.length;
-    final wasFullyLoaded = !state.hasMore;
-    final targetLoaded =
-        (wasFullyLoaded ? totalTracks : previouslyLoaded).clamp(0, totalTracks);
+      final totalTracks = await _playlistDao.getPlaylistTrackCount(playlistId);
+      final previouslyLoaded = state.playlist.tracks.length;
+      final wasFullyLoaded = !state.hasMore;
+      final targetLoaded =
+          (wasFullyLoaded ? totalTracks : previouslyLoaded).clamp(0, totalTracks);
 
       final refreshedTracks = targetLoaded == 0
           ? <Track>[]

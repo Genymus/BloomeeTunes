@@ -757,7 +757,6 @@ class _PlaylistViewState extends State<PlaylistView> {
 
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
-    int completed = 0;
     bool dialogOpen = true;
     final completedNotifier = ValueNotifier<int>(0);
     final currentTitleNotifier = ValueNotifier<String>('');
@@ -822,8 +821,7 @@ class _PlaylistViewState extends State<PlaylistView> {
           context.read<DownloaderCubit>().downloadSong(song, showSnackbar: false);
         } catch (_) {}
         await Future.delayed(const Duration(milliseconds: 100));
-        completed++;
-        completedNotifier.value = completed;
+        completedNotifier.value = completedNotifier.value + 1;
       }
 
       if (dialogOpen && mounted) {
