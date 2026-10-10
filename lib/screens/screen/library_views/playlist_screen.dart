@@ -759,7 +759,7 @@ class _PlaylistViewState extends State<PlaylistView> {
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
     final dialogClosed = Completer<void>();
-    final navigator = Navigator.of(context);
+    NavigatorState? dialogNavigator;
     final completedNotifier = ValueNotifier<int>(0);
     final currentTitleNotifier = ValueNotifier<String>('');
     final downloaderCubit = context.read<DownloaderCubit>();
@@ -768,7 +768,8 @@ class _PlaylistViewState extends State<PlaylistView> {
       final dialogFuture = showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (_) {
+        builder: (ctx) {
+          dialogNavigator = Navigator.of(ctx);
           return ValueListenableBuilder<int>(
             valueListenable: completedNotifier,
             builder: (context, done, _) => ValueListenableBuilder<String>(
@@ -833,8 +834,8 @@ class _PlaylistViewState extends State<PlaylistView> {
         completedNotifier.value = completedNotifier.value + 1;
       }
 
-      if (!dialogClosed.isCompleted) {
-        navigator.pop();
+      if (!dialogClosed.isCompleted && dialogNavigator?.mounted == true) {
+        dialogNavigator!.pop();
       }
       await dialogFuture;
     } finally {
