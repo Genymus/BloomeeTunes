@@ -218,7 +218,6 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
     } finally {
       _isRefreshingFromWatcher = false;
       if (_pendingWatcherRefresh && !isClosed) {
-        _pendingWatcherRefresh = false;
         unawaited(_refreshAfterPlaylistMutation());
       }
     }

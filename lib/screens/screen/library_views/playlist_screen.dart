@@ -759,7 +759,7 @@ class _PlaylistViewState extends State<PlaylistView> {
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
     final dialogClosed = Completer<void>();
-    final navigator = Navigator.of(context, rootNavigator: true);
+    final navigator = Navigator.of(context);
     final completedNotifier = ValueNotifier<int>(0);
     final currentTitleNotifier = ValueNotifier<String>('');
     final downloaderCubit = context.read<DownloaderCubit>();
