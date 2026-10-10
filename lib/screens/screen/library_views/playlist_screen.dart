@@ -760,6 +760,7 @@ class _PlaylistViewState extends State<PlaylistView> {
     bool dialogOpen = true;
     final completedNotifier = ValueNotifier<int>(0);
     final currentTitleNotifier = ValueNotifier<String>('');
+    final downloaderCubit = context.read<DownloaderCubit>();
 
     try {
       final dialogFuture = showDialog(
@@ -818,7 +819,7 @@ class _PlaylistViewState extends State<PlaylistView> {
       for (final song in items) {
         currentTitleNotifier.value = song.title;
         try {
-          context.read<DownloaderCubit>().downloadSong(song, showSnackbar: false);
+          downloaderCubit.downloadSong(song, showSnackbar: false);
         } catch (_) {}
         await Future.delayed(const Duration(milliseconds: 100));
         completedNotifier.value = completedNotifier.value + 1;
