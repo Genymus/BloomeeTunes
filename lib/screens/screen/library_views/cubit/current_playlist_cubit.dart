@@ -179,6 +179,8 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
       final previouslyLoaded = state.playlist.tracks.length;
       final addedTracks =
           totalTracks > state.totalTracks ? totalTracks - state.totalTracks : 0;
+      // Keep the already-loaded window stable on removals/reorders, while
+      // expanding it when new tracks are appended.
       final targetLoaded = (previouslyLoaded + addedTracks).clamp(0, totalTracks);
 
       final refreshedTracks = targetLoaded == 0

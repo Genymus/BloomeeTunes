@@ -759,92 +759,82 @@ class _PlaylistViewState extends State<PlaylistView> {
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
     int completed = 0;
-    String currentTitle = '';
-    BuildContext? activeDialogContext;
-    final dialogReady = Completer<void>();
-    void Function(void Function()) setStateRef = (_) {};
+    bool dialogOpen = true;
+    final completedNotifier = ValueNotifier<int>(0);
+    final currentTitleNotifier = ValueNotifier<String>('');
 
-    unawaited(
-      showDialog(
+    try {
+      final dialogFuture = showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (dialogCtx) {
-          activeDialogContext = dialogCtx;
-          if (!dialogReady.isCompleted) {
-            dialogReady.complete();
-          }
-          return StatefulBuilder(
-            builder: (sbCtx, sbSetState) {
-              setStateRef = sbSetState;
-              return AlertDialog(
-                backgroundColor: Default_Theme.themeColor,
-                contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-                content: SizedBox(
-                  width: 320,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.dialogAddingToDownloadQueue,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text('$completed/${items.length} items',
-                          style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7))),
-                      const SizedBox(height: 16),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: items.isEmpty
-                              ? 0
-                              : (completed / items.length).clamp(0.0, 1.0),
-                          minHeight: 6,
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                              Default_Theme.accentColor2),
-                        ),
+        builder: (_) => ValueListenableBuilder<int>(
+          valueListenable: completedNotifier,
+          builder: (context, done, _) => ValueListenableBuilder<String>(
+            valueListenable: currentTitleNotifier,
+            builder: (context, currentTitle, _) => AlertDialog(
+              backgroundColor: Default_Theme.themeColor,
+              contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+              content: SizedBox(
+                width: 320,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.dialogAddingToDownloadQueue,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Text('$done/${items.length} items',
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7))),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: items.isEmpty
+                            ? 0
+                            : (done / items.length).clamp(0.0, 1.0),
+                        minHeight: 6,
+                        backgroundColor: Colors.white.withValues(alpha: 0.1),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            Default_Theme.accentColor2),
                       ),
-                      const SizedBox(height: 12),
-                      Text(currentTitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              fontSize: 12)),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(currentTitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 12)),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-      ),
-    );
-    if (!dialogReady.isCompleted) {
-      try {
-        await dialogReady.future.timeout(const Duration(milliseconds: 300));
-      } catch (_) {}
-    }
+              ),
+            ),
+          ),
+        ),
+      ).whenComplete(() => dialogOpen = false);
+      unawaited(dialogFuture);
 
-    for (final song in items) {
-      if (activeDialogContext?.mounted ?? false) {
-        setStateRef(() => currentTitle = song.title);
-      }
-      try {
-        context.read<DownloaderCubit>().downloadSong(song, showSnackbar: false);
-      } catch (_) {}
-      await Future.delayed(const Duration(milliseconds: 100));
-      if (activeDialogContext?.mounted ?? false) {
-        setStateRef(() => completed++);
-      } else {
+      for (final song in items) {
+        currentTitleNotifier.value = song.title;
+        try {
+          context.read<DownloaderCubit>().downloadSong(song, showSnackbar: false);
+        } catch (_) {}
+        await Future.delayed(const Duration(milliseconds: 100));
         completed++;
+        completedNotifier.value = completed;
       }
-    }
-    if (activeDialogContext?.mounted ?? false) {
-      Navigator.of(activeDialogContext!).pop();
+
+      if (dialogOpen && mounted) {
+        Navigator.of(context).pop();
+      }
+      await dialogFuture;
+    } finally {
+      completedNotifier.dispose();
+      currentTitleNotifier.dispose();
     }
   }
 }
