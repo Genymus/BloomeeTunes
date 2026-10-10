@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:Bloomee/core/models/exported.dart';
 import 'package:Bloomee/core/models/media_playlist_model.dart';
@@ -209,8 +210,13 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
           errorMessage: null,
         ),
       );
-    } catch (_) {
-      // Ignore watcher refresh errors to avoid interrupting active sessions.
+    } catch (error, stackTrace) {
+      log(
+        'Failed to refresh playlist after mutation',
+        name: 'CurrentPlaylistCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
     } finally {
       _isRefreshingFromWatcher = false;
       if (_pendingWatcherRefresh && !isClosed) {

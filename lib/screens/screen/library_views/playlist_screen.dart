@@ -758,6 +758,7 @@ class _PlaylistViewState extends State<PlaylistView> {
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
     bool dialogOpen = true;
+    BuildContext? dialogContext;
     final completedNotifier = ValueNotifier<int>(0);
     final currentTitleNotifier = ValueNotifier<String>('');
     final downloaderCubit = context.read<DownloaderCubit>();
@@ -766,54 +767,57 @@ class _PlaylistViewState extends State<PlaylistView> {
       final dialogFuture = showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (_) => ValueListenableBuilder<int>(
-          valueListenable: completedNotifier,
-          builder: (context, done, _) => ValueListenableBuilder<String>(
-            valueListenable: currentTitleNotifier,
-            builder: (context, currentTitle, _) => AlertDialog(
-              backgroundColor: Default_Theme.themeColor,
-              contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-              content: SizedBox(
-                width: 320,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.dialogAddingToDownloadQueue,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text('$done/${items.length} items',
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7))),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: items.isEmpty
-                            ? 0
-                            : (done / items.length).clamp(0.0, 1.0),
-                        minHeight: 6,
-                        backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                            Default_Theme.accentColor2),
+        builder: (ctx) {
+          dialogContext = ctx;
+          return ValueListenableBuilder<int>(
+            valueListenable: completedNotifier,
+            builder: (context, done, _) => ValueListenableBuilder<String>(
+              valueListenable: currentTitleNotifier,
+              builder: (context, currentTitle, _) => AlertDialog(
+                backgroundColor: Default_Theme.themeColor,
+                contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                content: SizedBox(
+                  width: 320,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.dialogAddingToDownloadQueue,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text('$done/${items.length} items',
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7))),
+                      const SizedBox(height: 16),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: items.isEmpty
+                              ? 0
+                              : (done / items.length).clamp(0.0, 1.0),
+                          minHeight: 6,
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                              Default_Theme.accentColor2),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(currentTitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 12)),
-                  ],
+                      const SizedBox(height: 12),
+                      Text(currentTitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 12)),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ).whenComplete(() => dialogOpen = false);
 
       for (final song in items) {
@@ -825,8 +829,8 @@ class _PlaylistViewState extends State<PlaylistView> {
         completedNotifier.value = completedNotifier.value + 1;
       }
 
-      if (dialogOpen && mounted) {
-        Navigator.of(context).pop();
+      if (dialogOpen && dialogContext?.mounted == true) {
+        Navigator.of(dialogContext!).pop();
       }
       await dialogFuture;
     } finally {
