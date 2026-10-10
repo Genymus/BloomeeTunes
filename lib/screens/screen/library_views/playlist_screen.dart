@@ -834,7 +834,7 @@ class _PlaylistViewState extends State<PlaylistView> {
       }
 
       if (!dialogClosed.isCompleted) {
-        navigator.popUntil((route) => route is! PopupRoute);
+        navigator.pop();
       }
       await dialogFuture;
     } finally {
