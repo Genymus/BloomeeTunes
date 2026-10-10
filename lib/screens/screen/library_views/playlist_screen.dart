@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -757,76 +758,84 @@ class _PlaylistViewState extends State<PlaylistView> {
 
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) {
-        int completed = 0;
-        String currentTitle = '';
-        void Function(void Function()) setStateRef = (_) {};
+    int completed = 0;
+    String currentTitle = '';
+    BuildContext? activeDialogContext;
+    void Function(void Function()) setStateRef = (_) {};
 
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          for (final song in items) {
-            setStateRef(() => currentTitle = song.title);
-            try {
-              context
-                  .read<DownloaderCubit>()
-                  .downloadSong(song, showSnackbar: false);
-            } catch (_) {}
-            await Future.delayed(const Duration(milliseconds: 100));
-            setStateRef(() => completed++);
-          }
-          if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
-        });
-
-        return StatefulBuilder(
-          builder: (sbCtx, sbSetState) {
-            setStateRef = sbSetState;
-            return AlertDialog(
-              backgroundColor: Default_Theme.themeColor,
-              contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-              content: SizedBox(
-                width: 320,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.dialogAddingToDownloadQueue,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text('$completed/${items.length} items',
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7))),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: items.isEmpty
-                            ? 0
-                            : (completed / items.length).clamp(0.0, 1.0),
-                        minHeight: 6,
-                        backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                            Default_Theme.accentColor2),
+    unawaited(
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogCtx) {
+          activeDialogContext = dialogCtx;
+          return StatefulBuilder(
+            builder: (sbCtx, sbSetState) {
+              setStateRef = sbSetState;
+              return AlertDialog(
+                backgroundColor: Default_Theme.themeColor,
+                contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                content: SizedBox(
+                  width: 320,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.dialogAddingToDownloadQueue,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text('$completed/${items.length} items',
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7))),
+                      const SizedBox(height: 16),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: items.isEmpty
+                              ? 0
+                              : (completed / items.length).clamp(0.0, 1.0),
+                          minHeight: 6,
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                              Default_Theme.accentColor2),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(currentTitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 12)),
-                  ],
+                      const SizedBox(height: 12),
+                      Text(currentTitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 12)),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
+
+    for (final song in items) {
+      if (activeDialogContext?.mounted ?? false) {
+        setStateRef(() => currentTitle = song.title);
+      }
+      try {
+        context.read<DownloaderCubit>().downloadSong(song, showSnackbar: false);
+      } catch (_) {}
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (activeDialogContext?.mounted ?? false) {
+        setStateRef(() => completed++);
+      } else {
+        completed++;
+      }
+    }
+    if (activeDialogContext?.mounted ?? false) {
+      Navigator.of(activeDialogContext!).pop();
+    }
   }
 }

@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:async';
+
 import 'package:Bloomee/core/models/exported.dart';
 import 'package:Bloomee/core/models/media_playlist_model.dart';
 import 'package:Bloomee/services/db/dao/playlist_dao.dart';
@@ -22,6 +24,8 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
   int? _playlistId;
   int _loadedCount = 0;
   bool _isFetchingPage = false;
+  bool _isRefreshingFromWatcher = false;
+  StreamSubscription<void>? _playlistEntriesWatcher;
 
   CurrentPlaylistCubit({
     Playlist? playlist,
@@ -73,6 +77,7 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
     }
 
     _playlistId = playlistDB.id;
+    await _watchPlaylistEntries(_playlistId!);
     final totalTracks = await _playlistDao.getPlaylistTrackCount(playlistDB.id);
     final basePlaylist =
         playlistDBToPlaylist(playlistDB).copyWith(tracks: const []);
@@ -148,6 +153,60 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
       );
     } finally {
       _isFetchingPage = false;
+    }
+  }
+
+  Future<void> _watchPlaylistEntries(int playlistId) async {
+    await _playlistEntriesWatcher?.cancel();
+    _playlistEntriesWatcher =
+        (await _playlistDao.watchPlaylistEntries(playlistId)).listen(
+      (_) => unawaited(_refreshAfterPlaylistMutation()),
+    );
+  }
+
+  Future<void> _refreshAfterPlaylistMutation() async {
+    final playlistId = _playlistId;
+    if (playlistId == null || _isRefreshingFromWatcher) return;
+    _isRefreshingFromWatcher = true;
+    try {
+      final totalTracks = await _playlistDao.getPlaylistTrackCount(playlistId);
+      final previouslyLoaded = state.playlist.tracks.length;
+      final addedTracks =
+          totalTracks > state.totalTracks ? totalTracks - state.totalTracks : 0;
+      final targetLoaded = (previouslyLoaded + addedTracks).clamp(0, totalTracks);
+
+      final refreshedTracks = targetLoaded == 0
+          ? <Track>[]
+          : (await _playlistDao.getPlaylistTracksPage(
+              playlistId,
+              offset: 0,
+              limit: targetLoaded,
+            ))
+              .map(trackDBToTrack)
+              .toList(growable: false);
+
+      _loadedCount = refreshedTracks.length;
+      final hasMore = _loadedCount < totalTracks;
+      _playlist = state.playlist.copyWith(tracks: refreshedTracks);
+
+      emit(
+        state.copyWith(
+          playlist: _playlist,
+          totalTracks: totalTracks,
+          hasMore: hasMore,
+          status: totalTracks == 0
+              ? CurrentPlaylistLoadStatus.success
+              : (hasMore
+                  ? CurrentPlaylistLoadStatus.partial
+                  : CurrentPlaylistLoadStatus.success),
+          revision: state.revision + 1,
+          errorMessage: null,
+        ),
+      );
+    } catch (_) {
+      // Ignore watcher refresh errors to avoid interrupting active sessions.
+    } finally {
+      _isRefreshingFromWatcher = false;
     }
   }
 
@@ -269,4 +328,10 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
 
   /// Returns the name of the currently loaded playlist, or null if none.
   String? get currentPlaylistName => _playlist?.title;
+
+  @override
+  Future<void> close() async {
+    await _playlistEntriesWatcher?.cancel();
+    return super.close();
+  }
 }

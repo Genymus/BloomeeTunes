@@ -14,6 +14,7 @@ class CurrentPlaylistState extends Equatable {
   final Playlist playlist;
   final CurrentPlaylistLoadStatus status;
   final int totalTracks;
+  final int revision;
   final bool hasMore;
   final bool isLoadingMore;
   final String? errorMessage;
@@ -23,6 +24,7 @@ class CurrentPlaylistState extends Equatable {
     required this.playlist,
     this.status = CurrentPlaylistLoadStatus.initial,
     this.totalTracks = 0,
+    this.revision = 0,
     this.hasMore = false,
     this.isLoadingMore = false,
     this.errorMessage,
@@ -33,6 +35,7 @@ class CurrentPlaylistState extends Equatable {
     Playlist? playlist,
     CurrentPlaylistLoadStatus? status,
     int? totalTracks,
+    int? revision,
     bool? hasMore,
     bool? isLoadingMore,
     String? errorMessage,
@@ -42,6 +45,7 @@ class CurrentPlaylistState extends Equatable {
       playlist: playlist ?? this.playlist,
       status: status ?? this.status,
       totalTracks: totalTracks ?? this.totalTracks,
+      revision: revision ?? this.revision,
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       errorMessage: errorMessage,
@@ -55,6 +59,7 @@ class CurrentPlaylistState extends Equatable {
         playlist.title,
         status,
         totalTracks,
+        revision,
         hasMore,
         isLoadingMore,
         errorMessage,
