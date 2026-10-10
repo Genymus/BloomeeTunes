@@ -25,6 +25,7 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
   int _loadedCount = 0;
   bool _isFetchingPage = false;
   bool _isRefreshingFromWatcher = false;
+  bool _pendingWatcherRefresh = false;
   StreamSubscription<void>? _playlistEntriesWatcher;
 
   CurrentPlaylistCubit({
@@ -166,8 +167,13 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
 
   Future<void> _refreshAfterPlaylistMutation() async {
     final playlistId = _playlistId;
-    if (playlistId == null || _isRefreshingFromWatcher) return;
+    if (playlistId == null) return;
+    if (_isRefreshingFromWatcher) {
+      _pendingWatcherRefresh = true;
+      return;
+    }
     _isRefreshingFromWatcher = true;
+    _pendingWatcherRefresh = false;
     try {
       final totalTracks = await _playlistDao.getPlaylistTrackCount(playlistId);
       final previouslyLoaded = state.playlist.tracks.length;
@@ -207,6 +213,10 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
       // Ignore watcher refresh errors to avoid interrupting active sessions.
     } finally {
       _isRefreshingFromWatcher = false;
+      if (_pendingWatcherRefresh && !isClosed) {
+        _pendingWatcherRefresh = false;
+        unawaited(_refreshAfterPlaylistMutation());
+      }
     }
   }
 

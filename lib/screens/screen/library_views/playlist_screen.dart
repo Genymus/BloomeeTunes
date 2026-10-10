@@ -761,6 +761,7 @@ class _PlaylistViewState extends State<PlaylistView> {
     int completed = 0;
     String currentTitle = '';
     BuildContext? activeDialogContext;
+    final dialogReady = Completer<void>();
     void Function(void Function()) setStateRef = (_) {};
 
     unawaited(
@@ -769,6 +770,9 @@ class _PlaylistViewState extends State<PlaylistView> {
         barrierDismissible: true,
         builder: (dialogCtx) {
           activeDialogContext = dialogCtx;
+          if (!dialogReady.isCompleted) {
+            dialogReady.complete();
+          }
           return StatefulBuilder(
             builder: (sbCtx, sbSetState) {
               setStateRef = sbSetState;
@@ -819,6 +823,11 @@ class _PlaylistViewState extends State<PlaylistView> {
         },
       ),
     );
+    if (!dialogReady.isCompleted) {
+      try {
+        await dialogReady.future.timeout(const Duration(milliseconds: 300));
+      } catch (_) {}
+    }
 
     for (final song in items) {
       if (activeDialogContext?.mounted ?? false) {
