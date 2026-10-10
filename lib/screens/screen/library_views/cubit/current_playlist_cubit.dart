@@ -201,11 +201,9 @@ class CurrentPlaylistCubit extends Cubit<CurrentPlaylistState> {
           playlist: _playlist,
           totalTracks: totalTracks,
           hasMore: hasMore,
-          status: totalTracks == 0
-              ? CurrentPlaylistLoadStatus.success
-              : (hasMore
-                  ? CurrentPlaylistLoadStatus.partial
-                  : CurrentPlaylistLoadStatus.success),
+          status: hasMore
+              ? CurrentPlaylistLoadStatus.partial
+              : CurrentPlaylistLoadStatus.success,
           revision: state.revision + 1,
           errorMessage: null,
         ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -757,8 +758,8 @@ class _PlaylistViewState extends State<PlaylistView> {
 
   Future<void> _showAddToDownloadProgress(
       BuildContext context, List<Track> items, AppLocalizations l10n) async {
-    bool dialogOpen = true;
-    BuildContext? dialogContext;
+    final dialogClosed = Completer<void>();
+    final navigator = Navigator.of(context, rootNavigator: true);
     final completedNotifier = ValueNotifier<int>(0);
     final currentTitleNotifier = ValueNotifier<String>('');
     final downloaderCubit = context.read<DownloaderCubit>();
@@ -767,8 +768,7 @@ class _PlaylistViewState extends State<PlaylistView> {
       final dialogFuture = showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (ctx) {
-          dialogContext = ctx;
+        builder: (_) {
           return ValueListenableBuilder<int>(
             valueListenable: completedNotifier,
             builder: (context, done, _) => ValueListenableBuilder<String>(
@@ -818,7 +818,11 @@ class _PlaylistViewState extends State<PlaylistView> {
             ),
           );
         },
-      ).whenComplete(() => dialogOpen = false);
+      ).whenComplete(() {
+        if (!dialogClosed.isCompleted) {
+          dialogClosed.complete();
+        }
+      });
 
       for (final song in items) {
         currentTitleNotifier.value = song.title;
@@ -829,8 +833,8 @@ class _PlaylistViewState extends State<PlaylistView> {
         completedNotifier.value = completedNotifier.value + 1;
       }
 
-      if (dialogOpen && dialogContext?.mounted == true) {
-        Navigator.of(dialogContext!).pop();
+      if (!dialogClosed.isCompleted) {
+        navigator.popUntil((route) => route is! PopupRoute);
       }
       await dialogFuture;
     } finally {
