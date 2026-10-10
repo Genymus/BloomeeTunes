@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -816,7 +815,6 @@ class _PlaylistViewState extends State<PlaylistView> {
           ),
         ),
       ).whenComplete(() => dialogOpen = false);
-      unawaited(dialogFuture);
 
       for (final song in items) {
         currentTitleNotifier.value = song.title;
